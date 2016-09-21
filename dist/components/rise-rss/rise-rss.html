@@ -142,19 +142,25 @@ can only be used within Rise Vision [Offline Player](https://github.com/Rise-Vis
 
       _feedParserRequestUrl: "",
 
+      _getLocalStorageKey: function () {
+        return LOCAL_STORAGE_NAME + "_" + window.btoa(encodeURIComponent( escape( this.url ))) + "_" + this.entries;
+      },
+
       _getCachedData: function () {
         if (supportsLocalStorage()) {
           // retrieve cached data and parse back
-          return JSON.parse(localStorage.getItem(LOCAL_STORAGE_NAME));
+          return JSON.parse(localStorage.getItem(this._getLocalStorageKey()));
         }
 
         return null;
       },
 
       _setCachedData: function (data) {
+        console.log(this._getLocalStorageKey());
+
         if (supportsLocalStorage()) {
           try {
-            localStorage.setItem(LOCAL_STORAGE_NAME, JSON.stringify(data));
+            localStorage.setItem(this._getLocalStorageKey(), JSON.stringify(data));
           } catch(e) {
             console.warn(e.message);
           }
