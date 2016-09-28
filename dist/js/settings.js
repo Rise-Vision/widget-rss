@@ -12016,8 +12016,12 @@ module.run(["$templateCache", function($templateCache) {
 
           // Extract font name from font URL.
           function getCustomFontFamily() {
+            var family = null;
+
             if ($scope.fontData.font.url) {
-              return $scope.fontData.font.url.split("/").pop().split(".")[0];
+              // decode escape sequences to account for spaces in font name
+              family = decodeURI($scope.fontData.font.url.trim());
+              return family.split("/").pop().split(".")[0];
             }
 
             return null;
