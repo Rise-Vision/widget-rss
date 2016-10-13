@@ -181,7 +181,6 @@ RiseVision.RSS = (function (document, gadgets) {
   }
 
   function _initHorizontalScroll() {
-    document.getElementById("container").style.display = "none";
     document.getElementById("scroller").style.display = "block";
 
     _showLoadingMessage();

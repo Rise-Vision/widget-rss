@@ -104,6 +104,8 @@ RiseVision.RSS.HorizontalScroll = function (params, content) {
    *  Public Methods
    */
   function init(items) {
+    document.getElementById("container").style.display = "none";
+
     _items = items;
     _initScroller();
 
