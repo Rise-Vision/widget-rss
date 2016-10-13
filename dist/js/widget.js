@@ -1042,7 +1042,6 @@ var WIDGET_COMMON_CONFIG = {
   LOGGER_CLIENT_ID: "1088527147109-6q1o2vtihn34292pjt4ckhmhck0rk0o7.apps.googleusercontent.com",
   LOGGER_CLIENT_SECRET: "nlZyrcPLg6oEwO9f9Wfn29Wh",
   LOGGER_REFRESH_TOKEN: "1/xzt4kwzE1H7W9VnKB8cAaCx6zb4Es4nKEoqaYHdTD15IgOrJDtdun6zK6XiATCKT",
-  STORAGE_ENV: "prod",
   STORE_URL: "https://store-dot-rvaserver2.appspot.com/"
 };
 /* global WebFont */
@@ -1255,7 +1254,57 @@ RiseVision.Common.Utilities = (function() {
     return div.textContent;
   }
 
+  function hasInternetConnection(filePath, callback) {
+    var xhr = new XMLHttpRequest();
+
+    if (!filePath || !callback || typeof callback !== "function") {
+      return;
+    }
+
+    xhr.open("HEAD", filePath + "?cb=" + new Date().getTime(), false);
+
+    try {
+      xhr.send();
+
+      callback((xhr.status >= 200 && xhr.status < 304));
+
+    } catch (e) {
+      callback(false);
+    }
+  }
+
+  /**
+   * Check if chrome version is under a certain version
+   */
+  function isLegacy() {
+    var legacyVersion = 25;
+
+    var match = navigator.userAgent.match(/Chrome\/(\S+)/);
+    var version = match ? match[1] : 0;
+
+    if (version) {
+      version = parseInt(version.substring(0,version.indexOf(".")));
+
+      if (version <= legacyVersion) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  /**
+   * Adds http:// or https:// protocol to url if the protocol is missing
+   */
+  function addProtocol(url, secure) {
+    if (!/^(?:f|ht)tps?\:\/\//.test(url)) {
+      url = ((secure) ? "https://" : "http://") + url;
+    }
+    return url;
+  }
+
   return {
+    addProtocol: addProtocol,
     getQueryParameter: getQueryParameter,
     getFontCssStyle:  getFontCssStyle,
     addCSSRules:      addCSSRules,
@@ -1264,7 +1313,9 @@ RiseVision.Common.Utilities = (function() {
     loadGoogleFonts:   loadGoogleFonts,
     preloadImages:    preloadImages,
     getRiseCacheErrorMessage: getRiseCacheErrorMessage,
-    unescapeHTML: unescapeHTML
+    unescapeHTML: unescapeHTML,
+    hasInternetConnection: hasInternetConnection,
+    isLegacy: isLegacy
   };
 })();
 
@@ -1535,7 +1586,8 @@ RiseVision.Common.LoggerUtils = (function() {
   "use strict";
 
    var displayId = "",
-    companyId = "";
+     companyId = "",
+     version = null;
 
   /*
    *  Private Methods
@@ -1555,6 +1607,10 @@ RiseVision.Common.LoggerUtils = (function() {
 
       json.company_id = companyId;
       json.display_id = displayId;
+
+      if (version) {
+        json.version = version;
+      }
 
       cb(json);
     }
@@ -1578,7 +1634,7 @@ RiseVision.Common.LoggerUtils = (function() {
       day = "0" + day;
     }
 
-    return year + month + day;
+    return "" + year + month + day;
   }
 
   /*
@@ -1639,11 +1695,16 @@ RiseVision.Common.LoggerUtils = (function() {
     displayId = display;
   }
 
+  function setVersion(value) {
+    version = value;
+  }
+
   return {
     "getInsertData": getInsertData,
     "getFileFormat": getFileFormat,
     "logEvent": logEvent,
-    "setIds": setIds
+    "setIds": setIds,
+    "setVersion": setVersion
   };
 })();
 
@@ -3242,7 +3303,7 @@ RiseVision.Common.Message = function (mainContainer, messageContainer) {
       messageContainer.style.display = "none";
 
       // show main container
-      mainContainer.style.visibility = "visible";
+      mainContainer.style.display = "block";
 
       _active = false;
     }
@@ -3254,7 +3315,7 @@ RiseVision.Common.Message = function (mainContainer, messageContainer) {
 
     if (!_active) {
       // hide main container
-      mainContainer.style.visibility = "hidden";
+      mainContainer.style.display = "none";
 
       messageContainer.style.display = "block";
 
