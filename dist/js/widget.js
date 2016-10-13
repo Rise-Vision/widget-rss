@@ -1976,7 +1976,6 @@ RiseVision.RSS = (function (document, gadgets) {
   }
 
   function _initHorizontalScroll() {
-    document.getElementById("container").style.display = "none";
     document.getElementById("scroller").style.display = "block";
 
     _showLoadingMessage();
@@ -2849,6 +2848,8 @@ RiseVision.RSS.HorizontalScroll = function (params, content) {
    *  Public Methods
    */
   function init(items) {
+    document.getElementById("container").style.display = "none";
+
     _items = items;
     _initScroller();
 
