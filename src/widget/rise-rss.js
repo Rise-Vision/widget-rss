@@ -62,6 +62,7 @@ RiseVision.RSS.RiseRSS = function (data) {
       RiseVision.RSS.logEvent(params, true);
     });
 
+    rss.setAttribute("usage", "widget");
     rss.setAttribute("url", data.url);
 
     if (data.itemsInQueue) {
