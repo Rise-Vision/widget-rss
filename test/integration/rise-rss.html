@@ -85,10 +85,6 @@
         RiseVision.RSS.onRiseRSSInit.restore();
       });
 
-      test("should set usage attribute of rss component", function() {
-        assert.equal(rss.usage, "widget");
-      });
-
       test("should set url attribute of rss component", function() {
         assert.equal(rss.url, "http://test.com/feed.rss");
       });
