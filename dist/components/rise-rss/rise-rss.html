@@ -1,5 +1,6 @@
 <link rel="import" href="../polymer/polymer.html">
 <link rel="import" href="../iron-ajax/iron-ajax.html">
+<link rel="import" href="../rise-logger/rise-logger.html">
 
 <script src="../underscore/underscore.js"></script>
 
@@ -48,6 +49,7 @@ can only be used within Rise Vision [Offline Player](https://github.com/Rise-Vis
 
 <dom-module id="rise-rss">
   <template>
+    <rise-logger id="logger"></rise-logger>
     <iron-ajax id="feedParserRequest"
                url="{{_feedParserRequestUrl}}"
                handle-as="json"
@@ -57,6 +59,10 @@ can only be used within Rise Vision [Offline Player](https://github.com/Rise-Vis
     </iron-ajax>
   </template>
 </dom-module>
+
+<!-- build:version -->
+<script>var rssVersion = "1.4.0";</script>
+<!-- endbuild -->
 
 <script>
   (function() {
@@ -70,6 +76,8 @@ can only be used within Rise Vision [Offline Player](https://github.com/Rise-Vis
     var OFFLINE_MESSAGE_TYPE = "bypasscors";
 
     var LOCAL_STORAGE_NAME = "riserss";
+
+    var BQ_TABLE_NAME = "component_rss_events";
 
     var offlineWindow, offlineOrigin;
 
@@ -111,6 +119,14 @@ can only be used within Rise Vision [Offline Player](https://github.com/Rise-Vis
         },
 
         /**
+         * The optional usage type for Rise Vision logging purposes. Options are "standalone" or "widget"
+         */
+        usage: {
+          type: String,
+          value: ""
+        },
+
+        /**
          * Result of RSS feed url
          */
         results: {
@@ -141,6 +157,10 @@ can only be used within Rise Vision [Offline Player](https://github.com/Rise-Vis
       _feedParserUrl: "https://feed-parser.risevision.com/",
 
       _feedParserRequestUrl: "",
+
+      _isValidUsage: function(usage) {
+        return usage === "standalone" || usage === "widget";
+      },
 
       _getLocalStorageKey: function () {
         return LOCAL_STORAGE_NAME + "_" + window.btoa(encodeURIComponent( escape( this.url ))) + "_" + this.entries;
@@ -311,7 +331,20 @@ can only be used within Rise Vision [Offline Player](https://github.com/Rise-Vis
       // Element Lifecycle
 
       ready: function () {
-        var self = this;
+        var self = this,
+          params = {
+            event: "ready"
+          };
+
+        // only include usage_type if it's a valid usage value
+        if (this._isValidUsage(this.usage)) {
+          params.usage_type = this.usage;
+        }
+
+        params.version = rssVersion;
+
+        // log usage
+        this.$.logger.log(BQ_TABLE_NAME, params);
 
         // listen for message event on window which will be heard if running in Offline Player
         window.addEventListener("message", function (evt) {

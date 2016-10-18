@@ -131,6 +131,8 @@
     return gulp.src([
       "src/components/webcomponentsjs/webcomponents*.js",
       "src/components/rise-rss/rise-rss.html",
+      "src/components/rise-logger/rise-logger.html",
+      "src/components/rise-logger/rise-logger-utils.html",
       "src/components/rise-rss/modules.js",
       "src/components/underscore/*.js",
       "src/components/polymer/*.*{html,js}",
