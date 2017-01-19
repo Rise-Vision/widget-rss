@@ -1,4 +1,4 @@
-(function(window) {
+( function( window ) {
   "use strict";
 
   window.gadget = window.gadget || {};
@@ -52,7 +52,7 @@
           "bold": true,
           "italic": false,
           "underline": false,
-          "forecolor":"#969696",
+          "forecolor": "#969696",
           "backcolor": "transparent"
         }
       },
@@ -68,7 +68,7 @@
           "bold": true,
           "italic": false,
           "underline": false,
-          "forecolor":"#969696",
+          "forecolor": "#969696",
           "backcolor": "transparent"
         }
       },
@@ -76,7 +76,7 @@
         "showTitle": true,
         "showTimestamp": true,
         "showAuthor": true,
-        "showImage" : true,
+        "showImage": true,
         "showDescription": "snippet",
         "snippetLength": 120
       },
@@ -87,4 +87,4 @@
       }
     }
   };
-})(window);
+} )( window );

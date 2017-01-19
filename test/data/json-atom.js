@@ -1,4 +1,4 @@
-var jsonAtom = [
+var jsonAtom = [ // eslint-disable-line
   {
     "title": "Atom &ndash; Entry 1 title",
     "description": "Item 1 &ndash; Sample description",
@@ -11,7 +11,7 @@ var jsonAtom = [
     "author": null,
     "comments": null,
     "origlink": null,
-    "image": {"url": "http://image.image.test1/"},
+    "image": { "url": "http://image.image.test1/" },
     "source": {},
     "categories": [],
     "enclosures": [
@@ -122,7 +122,7 @@ var jsonAtom = [
     "author": null,
     "comments": null,
     "origlink": null,
-    "image": {"url": "http://image.image.test2/"},
+    "image": { "url": "http://image.image.test2/" },
     "source": {},
     "categories": [],
     "enclosures": [
@@ -233,7 +233,7 @@ var jsonAtom = [
     "author": null,
     "comments": null,
     "origlink": null,
-    "image": {"url": "http://image.image.test3/"},
+    "image": { "url": "http://image.image.test3/" },
     "source": {},
     "categories": [],
     "enclosures": [
@@ -344,7 +344,7 @@ var jsonAtom = [
     "author": null,
     "comments": null,
     "origlink": null,
-    "image": {"url": "http://image.image.test4/"},
+    "image": { "url": "http://image.image.test4/" },
     "source": {},
     "categories": [],
     "enclosures": [

@@ -1,28 +1,29 @@
+/* global $ */
+
 var RiseVision = RiseVision || {};
+
 RiseVision.RSS = RiseVision.RSS || {};
 
-RiseVision.RSS.TransitionVerticalScroll = function (params, content) {
+RiseVision.RSS.TransitionVerticalScroll = function( params, content ) {
   "use strict";
 
-  var _items = [];
-
-  var _waitingForUpdate = false,
-    _waitingToStart = false;
-
-  var _pudTimerID = null;
+  var _items = [],
+    _waitingForUpdate = false,
+    _waitingToStart = false,
+    _pudTimerID = null;
 
   /*
    *  Private Methods
    */
   function _clearPage() {
-    $(".page").empty();
+    $( ".page" ).empty();
   }
 
   function _getScrollEl() {
-    var $scrollContainer = $("#container");
+    var $scrollContainer = $( "#container" );
 
-    if (typeof $scrollContainer.data("plugin_autoScroll") !== "undefined") {
-      return  $scrollContainer.data("plugin_autoScroll");
+    if ( typeof $scrollContainer.data( "plugin_autoScroll" ) !== "undefined" ) {
+      return $scrollContainer.data( "plugin_autoScroll" );
     }
 
     return null;
@@ -31,25 +32,27 @@ RiseVision.RSS.TransitionVerticalScroll = function (params, content) {
   function _removeAutoscroll() {
     var $scrollContainer = _getScrollEl();
 
-    if ($scrollContainer) {
+    if ( $scrollContainer ) {
       // remove the "done" event handler before destroying
-      $("#container").autoScroll().off("done", _onScrollDone);
+      $( "#container" ).autoScroll().off( "done", _onScrollDone );
       // destroy the auto scroll instance
       $scrollContainer.destroy();
 
       // ensure page visibility is back on from possible previous fade out (scroll complete)
-      $(".page").css("visibility", "inherit");
-      $(".page").css("opacity", "1");
+      $( ".page" ).css( "visibility", "inherit" );
+      $( ".page" ).css( "opacity", "1" );
     }
   }
 
   function _showItems() {
+    var i;
+
     // show all the items
-    for (var i = 0; i < _items.length; i += 1) {
-      content.showItem(i);
+    for ( i = 0; i < _items.length; i += 1 ) {
+      content.showItem( i );
     }
 
-    $(".item").removeClass("hide");
+    $( ".item" ).removeClass( "hide" );
   }
 
   // If there is not enough content to scroll, use the PUD Failover setting as the trigger
@@ -57,65 +60,63 @@ RiseVision.RSS.TransitionVerticalScroll = function (params, content) {
   function _startPUDTimer() {
     var delay;
 
-    if ((params.transition.pud === undefined) || (params.transition.pud < 1)) {
+    if ( ( params.transition.pud === undefined ) || ( params.transition.pud < 1 ) ) {
       delay = 10000;
-    }
-    else {
+    } else {
       delay = params.transition.pud * 1000;
     }
 
-    if (!_pudTimerID) {
-      _pudTimerID = setTimeout(function() {
+    if ( !_pudTimerID ) {
+      _pudTimerID = setTimeout( function() {
 
         _pudTimerID = null;
         _onScrollDone();
 
-      }, delay);
+      }, delay );
     }
   }
 
   function _onScrollDone() {
-    if (_waitingForUpdate) {
+    if ( _waitingForUpdate ) {
       _waitingForUpdate = false;
 
       _removeAutoscroll();
 
-      content.loadImages(function () {
+      content.loadImages( function() {
         _clearPage();
         _showItems();
         _applyAutoScroll();
 
         RiseVision.RSS.onContentDone();
-      });
+      } );
 
-    }
-    else {
+    } else {
       RiseVision.RSS.onContentDone();
     }
   }
 
   function _applyAutoScroll() {
-    var $scrollContainer = $("#container");
+    var $scrollContainer = $( "#container" );
 
     // apply auto scroll
-    $scrollContainer.autoScroll({
-      "by": (params.transition.type === "scroll") ? "continuous" : "page",
+    $scrollContainer.autoScroll( {
+      "by": ( params.transition.type === "scroll" ) ? "continuous" : "page",
       "speed": params.transition.speed,
       "duration": params.transition.duration,
       "pause": params.transition.resume
-    }).on("done", _onScrollDone);
+    } ).on( "done", _onScrollDone );
   }
 
   /*
    *  Public Methods
    */
-  function init(items) {
+  function init( items ) {
     _items = items;
 
     _showItems();
     _applyAutoScroll();
 
-    if (_waitingToStart) {
+    if ( _waitingToStart ) {
       _waitingToStart = false;
       start();
     }
@@ -132,15 +133,13 @@ RiseVision.RSS.TransitionVerticalScroll = function (params, content) {
   function start() {
     var $scroll = _getScrollEl();
 
-    if (_items.length > 0) {
-      if ($scroll && $scroll.canScroll()) {
+    if ( _items.length > 0 ) {
+      if ( $scroll && $scroll.canScroll() ) {
         $scroll.play();
-      }
-      else {
+      } else {
         _startPUDTimer();
       }
-    }
-    else {
+    } else {
       _waitingToStart = true;
     }
   }
@@ -150,18 +149,18 @@ RiseVision.RSS.TransitionVerticalScroll = function (params, content) {
 
     _waitingToStart = false;
 
-    if ($scroll && $scroll.canScroll()) {
+    if ( $scroll && $scroll.canScroll() ) {
       $scroll.pause();
     }
 
     // Clear the PUD timer if the playlist item is not set to PUD.
-    if (_pudTimerID) {
-      clearTimeout(_pudTimerID);
+    if ( _pudTimerID ) {
+      clearTimeout( _pudTimerID );
       _pudTimerID = null;
     }
   }
 
-  function update(items) {
+  function update( items ) {
     _items = items;
     _waitingForUpdate = true;
   }

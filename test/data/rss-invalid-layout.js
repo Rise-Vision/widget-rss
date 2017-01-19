@@ -1,4 +1,4 @@
-(function(window) {
+( function( window ) {
   "use strict";
 
   window.gadget = window.gadget || {};
@@ -76,11 +76,11 @@
         "showTitle": true,
         "showTimestamp": true,
         "showAuthor": true,
-        "showImage" : true,
+        "showImage": true,
         "showDescription": "snippet",
         "snippetLength": 120
       },
       "layout": "layout-invalid"
     }
   };
-})(window);
+} )( window );

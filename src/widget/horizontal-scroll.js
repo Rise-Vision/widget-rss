@@ -1,7 +1,8 @@
 var RiseVision = RiseVision || {};
+
 RiseVision.RSS = RiseVision.RSS || {};
 
-RiseVision.RSS.HorizontalScroll = function (params, content) {
+RiseVision.RSS.HorizontalScroll = function( params, content ) {
   "use strict";
 
   var _items = [],
@@ -15,14 +16,14 @@ RiseVision.RSS.HorizontalScroll = function (params, content) {
    */
 
   function _initScroller() {
-    var scrollerElem = document.querySelector("#scroller");
+    var scrollerElem = document.querySelector( "#scroller" );
 
-    _scroller = new RiseVision.Common.Scroller(params);
+    _scroller = new RiseVision.Common.Scroller( params );
 
-    scrollerElem.addEventListener("ready", _onScrollerReady);
-    scrollerElem.addEventListener("done", _onScrollerDone);
+    scrollerElem.addEventListener( "ready", _onScrollerReady );
+    scrollerElem.addEventListener( "done", _onScrollerDone );
 
-    _scroller.init(_getItems());
+    _scroller.init( _getItems() );
   }
 
   function _getItems() {
@@ -32,52 +33,53 @@ RiseVision.RSS.HorizontalScroll = function (params, content) {
       story = "",
       item = null,
       items = [],
-      showSeparator = params.separator && params.separator.show;
+      showSeparator = params.separator && params.separator.show,
+      i;
 
-    for (var i = 0; i < _items.length; i++) {
-      title = content.getTitle(_items[i]);
-      author = content.getAuthor(_items[i]);
-      date = content.getDate(_items[i]);
-      story = content.getStory(_items[i]);
+    for ( i = 0; i < _items.length; i++ ) {
+      title = content.getTitle( _items[ i ] );
+      author = content.getAuthor( _items[ i ] );
+      date = content.getDate( _items[ i ] );
+      story = content.getStory( _items[ i ] );
 
       // Title
-      if (title && ((typeof params.dataSelection.showTitle === "undefined") || params.dataSelection.showTitle)) {
+      if ( title && ( ( typeof params.dataSelection.showTitle === "undefined" ) || params.dataSelection.showTitle ) ) {
         item = {};
         item.text = title;
         item.fontStyle = params.headline.fontStyle;
-        items.push(item);
+        items.push( item );
       }
 
       // Author
-      if (author && ((typeof params.dataSelection.showAuthor === "undefined") || params.dataSelection.showAuthor)) {
+      if ( author && ( ( typeof params.dataSelection.showAuthor === "undefined" ) || params.dataSelection.showAuthor ) ) {
         item = {};
         item.text = author;
         item.fontStyle = params.author.fontStyle;
-        items.push(item);
+        items.push( item );
       }
 
       // Date
-      if (date && ((typeof params.dataSelection.showTimestamp === "undefined") || params.dataSelection.showTimestamp)) {
+      if ( date && ( ( typeof params.dataSelection.showTimestamp === "undefined" ) || params.dataSelection.showTimestamp ) ) {
         item = {};
         item.text = date;
         item.fontStyle = params.timestamp.fontStyle;
-        items.push(item);
+        items.push( item );
       }
 
       // Story
-      if (story) {
+      if ( story ) {
         item = {};
         item.text = story;
         item.fontStyle = params.story.fontStyle;
-        items.push(item);
+        items.push( item );
       }
 
-      if (showSeparator) {
+      if ( showSeparator ) {
         item = {};
         item.separator = true;
         item.size = params.separator.size;
         item.color = params.separator.color;
-        items.push(item);
+        items.push( item );
       }
     }
 
@@ -90,11 +92,11 @@ RiseVision.RSS.HorizontalScroll = function (params, content) {
   }
 
   function _onScrollerDone() {
-    if (_waitingForUpdate) {
+    if ( _waitingForUpdate ) {
       _waitingForUpdate = false;
 
       // Refresh scroller.
-      _scroller.refresh(_getItems());
+      _scroller.refresh( _getItems() );
     }
 
     RiseVision.RSS.onContentDone();
@@ -103,13 +105,13 @@ RiseVision.RSS.HorizontalScroll = function (params, content) {
   /*
    *  Public Methods
    */
-  function init(items) {
-    document.getElementById("container").style.display = "none";
+  function init( items ) {
+    document.getElementById( "container" ).style.display = "none";
 
     _items = items;
     _initScroller();
 
-    if (_waitingToStart) {
+    if ( _waitingToStart ) {
       _waitingToStart = false;
       start();
     }
@@ -121,10 +123,9 @@ RiseVision.RSS.HorizontalScroll = function (params, content) {
   }
 
   function start() {
-    if (_scroller && _scrollerReady && (_items.length > 0)) {
+    if ( _scroller && _scrollerReady && ( _items.length > 0 ) ) {
       _scroller.play();
-    }
-    else {
+    } else {
       _waitingToStart = true;
     }
   }
@@ -132,12 +133,12 @@ RiseVision.RSS.HorizontalScroll = function (params, content) {
   function stop() {
     _waitingToStart = false;
 
-    if (_scroller) {
+    if ( _scroller ) {
       _scroller.pause();
     }
   }
 
-  function update(items) {
+  function update( items ) {
     _items = items;
     _waitingForUpdate = true;
   }

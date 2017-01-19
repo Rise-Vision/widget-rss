@@ -1,4 +1,4 @@
-angular.module("risevision.widget.rss.settings", [
+angular.module( "risevision.widget.rss.settings", [
   "risevision.common.i18n",
   "risevision.widget.rss.config",
   "risevision.widget.common",
@@ -7,4 +7,4 @@ angular.module("risevision.widget.rss.settings", [
   "risevision.widget.common.font-setting",
   "risevision.widget.common.transition-setting",
   "colorpicker.module"
-]);
+] );

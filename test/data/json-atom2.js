@@ -1,4 +1,4 @@
-var jsonAtom2 = [
+var jsonAtom2 = [ // eslint-disable-line
   {
     "title": "Autodesk Graphic",
     "description": "<p><img src=\"http://www.freeke.org/i/2015/autodesk_graphic_header.png\"alt=\"Autodesk Graphic header image\"title=\"Autodesk Graphic header image\"></img></p><p>Treated myself to <a href=\"https://itunes.apple.com/us/app/graphic/id404705039?mt=12\">this</a> as a late Christmas gift. Just playing around with it I’m pretty happy so far. Between 1990-1999 I used to support a small company’sworth of artists, illustrators, and layout people. I’ve never claimedto be any sort of artist, but out necessity I picked up some facilitywith the applications those folks used (primarily the Adobesuite.)</p><p>If you’d told me that I’d one day be able to buy an applicationthat had essentially all of the functionality of Illustrator (atleast the parts I used) for 1/20th of the price I’d have said youwere nuts.﻿</p><p>Apparently there’s a pretty feature-comparable iPad version thatreads and writes the same files. I’ll try that out later.</p>",
@@ -13,7 +13,7 @@ var jsonAtom2 = [
     "origlink": null,
     "image": {},
     "source": {},
-    "categories": ["/tech/computers/os/osx/applications"],
+    "categories": [ "/tech/computers/os/osx/applications" ],
     "enclosures": [
       {
         "url": "http://image.test1/",
@@ -182,7 +182,7 @@ var jsonAtom2 = [
     "origlink": null,
     "image": {},
     "source": {},
-    "categories": ["/administrivia/general"],
+    "categories": [ "/administrivia/general" ],
     "enclosures": [
       {
         "url": "http://image.test2/",

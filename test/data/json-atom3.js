@@ -1,4 +1,4 @@
-var jsonAtom3 = [
+var jsonAtom3 = [ // eslint-disable-line
   {
     "title": "New Wordpress Blog",
     "description": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>I've switched blogging systems and am now blogging via my new Wordpress installation which has its own RSS feed: <a href=\"http://drpeterjones.com/index.php/feed/\">http://drpeterjones.com/index.php/feed/</a></p></div>",
