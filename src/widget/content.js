@@ -126,7 +126,7 @@ RiseVision.RSS.Content = function( prefs, params ) {
       $content.find( ".headline" ).remove();
     } else {
       $content.find( ".headline" ).css( "textAlign", params.headline.fontStyle.align );
-      $content.find( ".headline a" ).text( title );
+      $content.find( ".headline a" ).html( title ).text();
     }
 
     // Timestamp
