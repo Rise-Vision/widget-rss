@@ -1,28 +1,26 @@
-/* jshint node: true */
-
-(function (console) {
+( ( console ) => {
   "use strict";
 
-  var bower = require("gulp-bower");
-  var bump = require("gulp-bump");
-  var colors = require("colors");
-  var del = require("del");
-  var env = process.env.NODE_ENV || "prod";
-  var factory = require("widget-tester").gulpTaskFactory;
-  var gulp = require("gulp");
-  var gulpif = require("gulp-if");
-  var gutil = require("gulp-util");
-  var jshint = require("gulp-jshint");
-  var minifyCSS = require("gulp-minify-css");
-  var path = require("path");
-  var rename = require("gulp-rename");
-  var runSequence = require("run-sequence");
-  var sourcemaps = require("gulp-sourcemaps");
-  var usemin = require("gulp-usemin");
-  var uglify = require("gulp-uglify");
-  var wct = require("web-component-tester").gulp.init(gulp);
+  const bower = require("gulp-bower"),
+    bump = require("gulp-bump"),
+    colors = require("colors"),
+    del = require("del"),
+    eslint = require("gulp-eslint"),
+    env = process.env.NODE_ENV || "prod",
+    factory = require("widget-tester").gulpTaskFactory,
+    gulp = require("gulp"),
+    gulpif = require("gulp-if"),
+    gutil = require("gulp-util"),
+    minifyCSS = require("gulp-minify-css"),
+    path = require("path"),
+    rename = require("gulp-rename"),
+    runSequence = require("run-sequence"),
+    sourcemaps = require("gulp-sourcemaps"),
+    usemin = require("gulp-usemin"),
+    uglify = require("gulp-uglify"),
+    wct = require("web-component-tester").gulp.init(gulp);
 
-  var appJSFiles = [
+  const appJSFiles = [
     "src/**/*.js",
     "!./src/components/**/*"
   ],
@@ -46,16 +44,16 @@
       "./src/components/angular/*.css"
     ];
 
-  gulp.task("clean-bower", function(cb){
+  gulp.task("clean-bower", (cb) => {
     del(["./src/components/**"], cb);
   });
 
-  gulp.task("clean", function (cb) {
+  gulp.task("clean", (cb) => {
     del(['./dist/**'], cb);
   });
 
-  gulp.task("config", function() {
-    var configFile = (env === "dev" ? "dev.js" : "prod.js");
+  gulp.task("config", () => {
+    let configFile = (env === "dev" ? "dev.js" : "prod.js");
 
     gutil.log("Environment is", env);
 
@@ -64,15 +62,15 @@
       .pipe(gulp.dest("./src/config"));
   });
 
-  gulp.task("lint", function() {
-    return gulp.src(appJSFiles)
-      .pipe(jshint())
-      .pipe(jshint.reporter("jshint-stylish"))
-      .pipe(jshint.reporter("fail"));
+  gulp.task("lint", () => {
+    return gulp.src( [ "src/**/*.js", "test/**/*.js" ] )
+      .pipe( eslint() )
+      .pipe( eslint.format() )
+      .pipe( eslint.failAfterError() );
   });
 
-  gulp.task("source", ["lint"], function () {
-    var isProd = (env === "prod");
+  gulp.task("source", ["lint"], () => {
+    let isProd = (env === "prod");
 
     return gulp.src(htmlFiles)
       .pipe(gulpif(isProd,
@@ -87,7 +85,7 @@
       .pipe(gulp.dest("dist/"));
   });
 
-  gulp.task("unminify", function () {
+  gulp.task("unminify", () => {
     return gulp.src(htmlFiles)
       .pipe(usemin({
         css: [rename(function (path) {
@@ -99,12 +97,12 @@
       }))
   });
 
-  gulp.task("fonts", function() {
+  gulp.task("fonts", () => {
     return gulp.src("src/components/common-style/dist/fonts/**/*")
       .pipe(gulp.dest("dist/fonts"));
   });
 
-  gulp.task("images", function() {
+  gulp.task("images", () => {
     gulp.src([
       "src/components/rv-bootstrap-formhelpers/img/bootstrap-formhelpers-googlefonts.png",
       "src/img/**/*"
@@ -112,22 +110,22 @@
       .pipe(gulp.dest("dist/img"));
   });
 
-  gulp.task("layouts", function() {
+  gulp.task("layouts", () => {
     return gulp.src("src/widget/layouts/*.html")
       .pipe(gulp.dest("dist/layouts"));
   });
 
-  gulp.task("i18n", function(cb) {
+  gulp.task("i18n", () => {
     return gulp.src(["src/components/rv-common-i18n/dist/locales/**/*"])
       .pipe(gulp.dest("dist/locales"));
   });
 
-  gulp.task("vendor", function(cb) {
+  gulp.task("vendor", () => {
     return gulp.src(vendorFiles, {base: "./src/components"})
       .pipe(gulp.dest("dist/js/vendor"));
   });
 
-  gulp.task("rise-rss", function() {
+  gulp.task("rise-rss", () => {
     return gulp.src([
       "src/components/webcomponentsjs/webcomponents*.js",
       "src/components/rise-rss/rise-rss.html",
@@ -157,11 +155,11 @@
     testFiles: "test/e2e/settings.js"}
   ));
 
-  gulp.task("test:e2e:settings", function(cb) {
+  gulp.task("test:e2e:settings", (cb) => {
     runSequence(["e2e:server:settings"], "test:e2e:settings:run", "e2e:server-close", cb);
   });
 
-  gulp.task("test:e2e", function(cb) {
+  gulp.task("test:e2e", (cb) => {
     runSequence("test:e2e:settings", cb);
   });
 
@@ -203,45 +201,45 @@
     ]}
   ));
 
-  gulp.task("test:unit", function(cb) {
+  gulp.task("test:unit", (cb) => {
     runSequence("test:unit:settings", "test:unit:widget", cb);
   });
 
   // ***** Integration Testing ***** //
-  gulp.task("test:integration", function(cb) {
+  gulp.task("test:integration", (cb) => {
     runSequence("test:local", cb);
   });
 
   // ***** Primary Tasks ***** //
-  gulp.task("bower-clean-install", ["clean-bower"], function(cb){
-    return bower().on("error", function(err) {
+  gulp.task("bower-clean-install", ["clean-bower"], (cb) => {
+    return bower().on("error", (err) => {
       console.log(err);
       cb();
     });
   });
 
-  gulp.task("bower-update", function (cb) {
-    return bower({ cmd: "update"}).on("error", function(err) {
+  gulp.task("bower-update", (cb) => {
+    return bower({ cmd: "update"}).on("error", (err) => {
       console.log(err);
       cb();
     });
   });
 
-  gulp.task("build", function (cb) {
+  gulp.task("build", (cb) => {
     runSequence(["clean", "config", "bower-update"], ["source", "fonts", "images", "layouts", "i18n", "vendor", "rise-rss"], ["unminify"], cb);
   });
 
-  gulp.task("bump", function(){
+  gulp.task("bump", () => {
     return gulp.src(["./package.json", "./bower.json"])
       .pipe(bump({type:"patch"}))
       .pipe(gulp.dest("./"));
   });
 
-  gulp.task("test", function(cb) {
+  gulp.task("test", (cb) => {
     runSequence("test:unit", "test:e2e", "test:integration", cb);
   });
 
-  gulp.task("default", [], function() {
+  gulp.task("default", [], () => {
     console.log("********************************************************************".yellow);
     console.log("  gulp bower-clean-install: delete and re-install bower components".yellow);
     console.log("  gulp build: build a distribution version".yellow);
