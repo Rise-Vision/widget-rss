@@ -1,4 +1,4 @@
-var validFeedJSON = {
+var validFeedJSON = { // eslint-disable-line
   "Envelope": [
     {
       "Body": [

@@ -79,8 +79,8 @@
     suite("Transitioning", function() {
 
       test("should always transition to next rss item after 20 seconds", function() {
-        assert.equal(document.querySelector(".headline a").innerHTML,
-          "RSS 2.0 - Entry 1 title", "first item displaying");
+        assert.equal($(".headline a").eq(0).text(),
+          "RSS 2.0 & Entry 1 title", "first item displaying");
 
         clock.tick(20000);
 
@@ -116,8 +116,8 @@
         clock.tick(40000);
 
         assert(contentDoneSpy.calledOnce, "onContentDone called once");
-        assert.equal(document.querySelector(".headline a").innerHTML,
-          "RSS 2.0 - Entry 1 title", "First item displaying again");
+        assert.equal($(".headline a").eq(0).text(),
+          "RSS 2.0 & Entry 1 title", "First item displaying again");
 
         RiseVision.RSS.onContentDone.restore();
 

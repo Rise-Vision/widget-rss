@@ -1,4 +1,4 @@
-var jsonRSSUpdate = [
+var jsonRSSUpdate = [ // eslint-disable-line
   {
     "title": "RSS 2.0 - Entry 5 title",
     "description": "Item 5 - Sample description",

@@ -104,8 +104,8 @@
       });
 
       test("should populate headline correctly", function() {
-        assert.equal(document.querySelector(".headline a").innerHTML,
-          "RSS 2.0 - Entry 1 title");
+        assert.equal($(".headline a").eq(0).text(),
+          "RSS 2.0 & Entry 1 title");
       });
 
       test("should populate timestamp", function() {
@@ -152,8 +152,8 @@
       test("should always transition to next set of rss items after 10 seconds", function() {
         var headlines = document.querySelectorAll(".headline a");
 
-        assert.equal(headlines[0].innerHTML,
-          "RSS 2.0 - Entry 1 title", "first item displaying");
+        assert.equal($(headlines[0]).eq(0).text(),
+          "RSS 2.0 & Entry 1 title", "first item displaying");
 
         assert.equal(headlines[1].innerHTML,
           "RSS 2.0 - Entry 2 title", "second item displaying");
@@ -180,8 +180,8 @@
         clock.tick(10000);
 
         assert(contentDoneSpy.calledOnce, "onContentDone called once");
-        assert.equal(document.querySelector(".headline a").innerHTML,
-          "RSS 2.0 - Entry 1 title", "first item displaying again");
+        assert.equal($(".headline a").eq(0).text(),
+          "RSS 2.0 & Entry 1 title", "first item displaying again");
 
         RiseVision.RSS.onContentDone.restore();
 

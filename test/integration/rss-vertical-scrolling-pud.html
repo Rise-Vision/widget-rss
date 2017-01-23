@@ -117,8 +117,8 @@
     suite("Feed refresh", function () {
 
       test("should refresh content after PUD timer complete", function () {
-        assert.equal(document.querySelector(".headline a").innerHTML,
-          "RSS 2.0 - Entry 1 title", "first item displaying");
+        assert.equal($(".headline a").eq(0).text(),
+          "RSS 2.0 & Entry 1 title", "first item displaying");
 
         RiseVision.RSS.onRiseRSSRefresh({
           "items": [{

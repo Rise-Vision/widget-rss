@@ -1,31 +1,30 @@
+/* global $ */
+
 var RiseVision = RiseVision || {};
+
 RiseVision.RSS = RiseVision.RSS || {};
 
-RiseVision.RSS.TransitionNoScroll = function (params, content) {
+RiseVision.RSS.TransitionNoScroll = function( params, content ) {
 
   "use strict";
 
-  var _items = [];
-
-  var _currentItemIndex = 0;
-
-  var _transitionIntervalId = null;
-
-  var _waitingForUpdate = false,
+  var _items = [],
+    _currentItemIndex = 0,
+    _transitionIntervalId = null,
+    _waitingForUpdate = false,
     _waitingToStart = false;
 
   /*
    *  Private Methods
    */
-  function _getTransitionConfig(index) {
+  function _getTransitionConfig( index ) {
     var config = {};
 
-    if ((index + params.itemsToShow) >= (_items.length - 1)) {
+    if ( ( index + params.itemsToShow ) >= ( _items.length - 1 ) ) {
       // account for not enough items to actually show from the feed
-      config.itemsToShow = _items.length - (index + 1);
-      config.currentItemIndex = (_items.length - 1);
-    }
-    else {
+      config.itemsToShow = _items.length - ( index + 1 );
+      config.currentItemIndex = ( _items.length - 1 );
+    } else {
       config.itemsToShow = params.itemsToShow;
       // value is the index of the last item showing
       config.currentItemIndex = index + params.itemsToShow;
@@ -37,129 +36,127 @@ RiseVision.RSS.TransitionNoScroll = function (params, content) {
   function _getStartConfig() {
     var config = {};
 
-    if (_items.length <= params.itemsToShow) {
+    if ( _items.length <= params.itemsToShow ) {
       // account for not enough items to actually show from the feed
       config.itemsToShow = _items.length;
-      config.currentItemIndex = (_items.length - 1);
-    }
-    else {
+      config.currentItemIndex = ( _items.length - 1 );
+    } else {
       config.itemsToShow = params.itemsToShow;
       // value is the index of the last item showing
-      config.currentItemIndex = (params.itemsToShow - 1);
+      config.currentItemIndex = ( params.itemsToShow - 1 );
     }
 
     return config;
   }
 
-  function _clearPage(cb) {
-    $(".page").empty();
+  function _clearPage( cb ) {
+    $( ".page" ).empty();
 
-    if (!cb || typeof cb !== "function") {
+    if ( !cb || typeof cb !== "function" ) {
       return;
-    }
-    else {
+    } else {
       cb();
     }
   }
 
-  function _clear(cb) {
-    if (params.transition.type === "fade") {
-      $(".item").one("webkitTransitionEnd transitionend", function() {
-        _clearPage(cb);
-      });
+  function _clear( cb ) {
+    if ( params.transition.type === "fade" ) {
+      $( ".item" ).one( "webkitTransitionEnd transitionend", function() {
+        _clearPage( cb );
+      } );
 
-      $(".item").addClass("fade-out").removeClass("fade-in");
-    }
-    else {
-      _clearPage(cb);
+      $( ".item" ).addClass( "fade-out" ).removeClass( "fade-in" );
+    } else {
+      _clearPage( cb );
     }
   }
 
-  function _show(index) {
-    content.showItem(index);
+  function _show( index ) {
+    content.showItem( index );
 
-    if (params.transition.type === "fade") {
-      $(".item").addClass("fade-in");
+    if ( params.transition.type === "fade" ) {
+      $( ".item" ).addClass( "fade-in" );
     }
 
-    $(".item").removeClass("hide");
+    $( ".item" ).removeClass( "hide" );
   }
 
   function _makeTransition() {
     var startConfig = _getStartConfig(),
-      transConfig = _getTransitionConfig(_currentItemIndex),
-      startingIndex;
+      transConfig = _getTransitionConfig( _currentItemIndex ),
+      startingIndex,
+      i;
 
-    if (_currentItemIndex === (_items.length - 1)) {
+    if ( _currentItemIndex === ( _items.length - 1 ) ) {
 
       _stopTransitionTimer();
 
-      _clear(function() {
+      _clear( function() {
 
         // show the items
-        for (var i = 0; i < startConfig.itemsToShow; i += 1) {
-          _show(i);
+        for ( i = 0; i < startConfig.itemsToShow; i += 1 ) {
+          _show( i );
         }
 
         _currentItemIndex = startConfig.currentItemIndex;
 
         RiseVision.RSS.onContentDone();
-      });
+      } );
 
       _waitingForUpdate = false;
 
       return;
     }
 
-    if (_waitingForUpdate) {
+    if ( _waitingForUpdate ) {
       _waitingForUpdate = false;
 
-      content.loadImages(function () {
-        _clear(function () {
-          for (var i = 0; i < startConfig.itemsToShow; i += 1) {
-            _show(i);
+      content.loadImages( function() {
+        _clear( function() {
+          for ( i = 0; i < startConfig.itemsToShow; i += 1 ) {
+            _show( i );
           }
 
           _currentItemIndex = startConfig.currentItemIndex;
-        });
-      });
+        } );
+      } );
 
-    }
-    else {
+    } else {
       startingIndex = _currentItemIndex + 1;
 
       _currentItemIndex = transConfig.currentItemIndex;
 
-      _clear(function () {
-        for (var i = startingIndex; i < (startingIndex + transConfig.itemsToShow); i += 1) {
-          _show(i);
+      _clear( function() {
+        for ( i = startingIndex; i < ( startingIndex + transConfig.itemsToShow ); i += 1 ) {
+          _show( i );
         }
-      });
+      } );
     }
 
   }
 
   function _startTransitionTimer() {
     // legacy, backwards compatibility for duration value
-    var duration = (params.transition.duration / 1000 >= 1) ? params.transition.duration : params.transition.duration * 1000;
+    var duration = ( params.transition.duration / 1000 >= 1 ) ? params.transition.duration : params.transition.duration * 1000;
 
-    if (_transitionIntervalId === null) {
-      _transitionIntervalId = setInterval(function () {
+    if ( _transitionIntervalId === null ) {
+      _transitionIntervalId = setInterval( function() {
         _makeTransition();
-      }, duration);
+      }, duration );
     }
   }
 
   function _stopTransitionTimer() {
-    clearInterval(_transitionIntervalId);
+    clearInterval( _transitionIntervalId );
     _transitionIntervalId = null;
   }
 
   /*
    *  Public Methods
    */
-  function init(items) {
-    var startConfig;
+  function init( items ) {
+    var startConfig,
+      i;
 
     _items = items;
     startConfig = _getStartConfig();
@@ -167,11 +164,11 @@ RiseVision.RSS.TransitionNoScroll = function (params, content) {
     _currentItemIndex = startConfig.currentItemIndex;
 
     // show the items
-    for (var i = 0; i < startConfig.itemsToShow; i += 1) {
-      _show(i);
+    for ( i = 0; i < startConfig.itemsToShow; i += 1 ) {
+      _show( i );
     }
 
-    if (_waitingToStart) {
+    if ( _waitingToStart ) {
       _waitingToStart = false;
       start();
     }
@@ -185,10 +182,9 @@ RiseVision.RSS.TransitionNoScroll = function (params, content) {
   }
 
   function start() {
-    if (_items.length > 0) {
+    if ( _items.length > 0 ) {
       _startTransitionTimer();
-    }
-    else {
+    } else {
       _waitingToStart = true;
     }
   }
@@ -198,7 +194,7 @@ RiseVision.RSS.TransitionNoScroll = function (params, content) {
     _stopTransitionTimer();
   }
 
-  function update(items) {
+  function update( items ) {
     _items = items;
     _waitingForUpdate = true;
   }

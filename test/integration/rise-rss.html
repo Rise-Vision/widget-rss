@@ -125,8 +125,8 @@
         var headlines = document.querySelectorAll(".headline a");
         var author = document.querySelectorAll(".author");
 
-        assert.equal(headlines[0].innerHTML,
-          "RSS 2.0 - Entry 1 title", "original first item displayed");
+        assert.equal($(headlines[0]).eq(0).text(),
+          "RSS 2.0 & Entry 1 title", "original first item displayed");
         assert.equal(author[0].innerHTML,
           "Mr. X1");
 

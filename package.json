@@ -23,9 +23,12 @@
     "chai-as-promised": "^4.3.0",
     "colors": "~1.0.3",
     "del": "~1.1.1",
+    "eslint": "^3.8.1",
+    "eslint-config-idiomatic": "^2.1.0",
     "gulp": "^3.9.0",
     "gulp-bower": "~0.0.10",
     "gulp-bump": "~0.1.8",
+    "gulp-eslint": "^3.0.1",
     "gulp-if": "^2.0.0",
     "gulp-jshint": "~1.5.5",
     "gulp-minify-css": "0.3.4",
@@ -35,9 +38,8 @@
     "gulp-usemin": "0.3.7",
     "gulp-util": "~2.2.17",
     "jshint-stylish": "^2.1.0",
-    "phantomjs": "^1.9.16",
     "run-sequence": "^0.3.2",
     "web-component-tester": "*",
-    "widget-tester": "git://github.com/Rise-Vision/widget-tester.git#1.6.4"
+    "widget-tester": "git://github.com/Rise-Vision/widget-tester.git#1.7.1"
   }
 }

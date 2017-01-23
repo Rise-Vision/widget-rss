@@ -79,7 +79,7 @@
 
     suite("Show Title", function () {
       test("should populate headline", function() {
-        assert.equal(document.querySelector(".headline a").innerHTML, "RSS 2.0 - Entry 1 title");
+        assert.equal($(".headline a").eq(0).text(), "RSS 2.0 & Entry 1 title");
       });
     });
 
@@ -112,7 +112,7 @@
 
       test("should transition to next set of rss items after 10 seconds", function () {
 
-        assert.equal(document.querySelector(".headline a").innerHTML, "RSS 2.0 - Entry 1 title", "first item displaying");
+        assert.equal($(".headline a").eq(0).text(), "RSS 2.0 & Entry 1 title", "first item displaying");
 
         clock.tick(10000);
 

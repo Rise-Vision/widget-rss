@@ -1,4 +1,4 @@
-var jsonAtom1 = [
+var jsonAtom1 = [ // eslint-disable-line
   {
     "title": "Ajax Tutorial",
     "description": "Ajax and XMLHttpRequest with the GET, POST method for text, XML or JSON files.",
@@ -13,7 +13,7 @@ var jsonAtom1 = [
     "origlink": null,
     "image": {},
     "source": {},
-    "categories": ["Ajax"],
+    "categories": [ "Ajax" ],
     "enclosures": [
       {
         "url": "http://image.test1/",
@@ -168,7 +168,7 @@ var jsonAtom1 = [
     "origlink": null,
     "image": {},
     "source": {},
-    "categories": ["Ajax"],
+    "categories": [ "Ajax" ],
     "enclosures": [
       {
         "url": "http://image.test2/",
@@ -323,7 +323,7 @@ var jsonAtom1 = [
     "origlink": null,
     "image": {},
     "source": {},
-    "categories": ["Ajax"],
+    "categories": [ "Ajax" ],
     "enclosures": [],
     "atom:@": {
       "xml:lang": "en"
@@ -463,7 +463,7 @@ var jsonAtom1 = [
     "origlink": null,
     "image": {},
     "source": {},
-    "categories": ["Ajax"],
+    "categories": [ "Ajax" ],
     "enclosures": [],
     "atom:@": {
       "xml:lang": "en"
@@ -603,7 +603,7 @@ var jsonAtom1 = [
     "origlink": null,
     "image": {},
     "source": {},
-    "categories": ["Ajax"],
+    "categories": [ "Ajax" ],
     "enclosures": [],
     "atom:@": {
       "xml:lang": "en"
@@ -743,7 +743,7 @@ var jsonAtom1 = [
     "origlink": null,
     "image": {},
     "source": {},
-    "categories": ["webmaster"],
+    "categories": [ "webmaster" ],
     "enclosures": [],
     "atom:@": {
       "xml:lang": "en"

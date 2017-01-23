@@ -1,8 +1,9 @@
 var RiseVision = RiseVision || {};
+
 RiseVision.RSS = RiseVision.RSS || {};
 RiseVision.RSS.Images = {};
 
-RiseVision.RSS.Images = (function () {
+RiseVision.RSS.Images = ( function() {
 
   "use strict";
 
@@ -11,49 +12,49 @@ RiseVision.RSS.Images = (function () {
     _images = [],
     _callback = null;
 
-  function _onImageLoaded(image) {
-    _images.push(image);
+  function _onImageLoaded( image ) {
+    _images.push( image );
     _imageCount += 1;
 
-    if (_imageCount === _imagesToLoad.length && _callback && typeof _callback === "function") {
+    if ( _imageCount === _imagesToLoad.length && _callback && typeof _callback === "function" ) {
       _callback();
     }
   }
 
   function _loadImage() {
     var img = new Image();
-    _onImageLoaded(img);
+
+    _onImageLoaded( img );
   }
 
   function _loadImages() {
     var i;
 
-    for (i = 0; i < _imagesToLoad.length; i += 1) {
-      if (_imagesToLoad[i] === null) {
-        _onImageLoaded(null);
+    for ( i = 0; i < _imagesToLoad.length; i += 1 ) {
+      if ( _imagesToLoad[ i ] === null ) {
+        _onImageLoaded( null );
       } else {
-        _loadImage(_imagesToLoad[i]);
+        _loadImage( _imagesToLoad[ i ] );
       }
     }
   }
 
-  function load(images, callback) {
-    if (images.length > 0) {
+  function load( images, callback ) {
+    if ( images.length > 0 ) {
       _imagesToLoad = images;
       _images = [];
       _imageCount = 0;
 
-      if (callback) {
+      if ( callback ) {
         _callback = callback;
-      }
-      else {
+      } else {
         _callback = null;
       }
 
       _loadImages();
 
 
-    } else if (callback && typeof callback === "function") {
+    } else if ( callback && typeof callback === "function" ) {
       callback();
     }
   }
@@ -67,4 +68,4 @@ RiseVision.RSS.Images = (function () {
     load: load
   };
 
-})();
+} )();

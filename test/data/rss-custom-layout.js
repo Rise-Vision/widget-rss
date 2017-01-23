@@ -1,4 +1,4 @@
-(function(window) {
+( function( window ) {
   "use strict";
 
   window.gadget = window.gadget || {};
@@ -76,7 +76,7 @@
         "showTitle": true,
         "showTimestamp": true,
         "showAuthor": true,
-        "showImage" : true,
+        "showImage": true,
         "showDescription": "snippet",
         "snippetLength": 120
       },
@@ -84,4 +84,4 @@
       "layoutUrl": "http://fakeurl.com/custom-layout.html"
     }
   };
-})(window);
+} )( window );
