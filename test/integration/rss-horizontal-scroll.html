@@ -30,6 +30,8 @@
 
 <script src="../data/rss-horizontal-scroll.js"></script>
 <script src="../data/json-rss.js"></script>
+<script src="../data/json-rss-canvas-over-size.js"></script>
+
 
 <script src="../../node_modules/widget-tester/mocks/gadget-mocks.js"></script>
 <script src="../../node_modules/widget-tester/mocks/gadgets.io-mock.js"></script>
@@ -117,6 +119,31 @@
 
       this.timeout(30000);
       scroller.addEventListener("done", responseHandler);
+    });
+
+    test("should log an error when size of the canvas is over the max size", function (done) {
+      context.clear();
+
+      var spy = sinon.spy(RiseVision.RSS, "logEvent");
+
+      RiseVision.RSS.onRiseRSSRefresh({
+        "items": jsonRssOversized
+      });
+
+      setTimeout(function(){
+        assert(spy.calledOnce);
+        assert.deepEqual(spy.args[0][0], {
+          "company_id": "\"companyId\"",
+          "display_id": "\"displayId\"",
+          "event": "error",
+          "event_details": "canvas width is over the max size",
+          "feed_url": "http://test.com/feed.rss"
+        });
+
+        RiseVision.RSS.logEvent.restore();
+        done();
+      }, 5000);
+
     });
   });
 </script>

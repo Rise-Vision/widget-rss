@@ -40,6 +40,6 @@
     "jshint-stylish": "^2.1.0",
     "run-sequence": "^0.3.2",
     "web-component-tester": "*",
-    "widget-tester": "git://github.com/Rise-Vision/widget-tester.git#1.7.1"
+    "widget-tester": "git://github.com/Rise-Vision/widget-tester.git#1.7.2"
   }
 }
