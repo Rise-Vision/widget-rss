@@ -47,8 +47,17 @@
 
 <script>
 
+  var rss = document.querySelector("rise-rss"), paramsStub2;
   sinon.stub(rss.$.data, "getItem", function(key, cb) {
     cb(null);
+  });
+
+  paramsStub2 = sinon.stub(rss, "go", function () {
+    // restore the function
+    paramsStub2.restore();
+    rss._onDataPingReceived();
+    // call it again with the params
+    rss.go();
   });
 
   suite("Data Selection", function() {

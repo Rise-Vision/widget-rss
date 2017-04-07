@@ -48,8 +48,8 @@
   <script src="../../src/widget/main.js"></script>
 
   <script>
-    var paramsStub, server
-
+    var paramsStub, paramsStub2, server
+    var rss = document.querySelector("rise-rss");
     sinon.stub(rss.$.data, "getItem", function(key, cb) {
       cb(null);
     });
@@ -61,6 +61,14 @@
 
       paramsStub.restore();
       RiseVision.RSS.setAdditionalParams(additionalParams);
+    });
+
+    paramsStub2 = sinon.stub(rss, "go", function () {
+      // restore the function
+      paramsStub2.restore();
+      rss._onDataPingReceived();
+      // call it again with the params
+      rss.go();
     });
 
     suite("Custom Layout", function() {

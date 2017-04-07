@@ -50,7 +50,8 @@
 
 <script>
 
-  var clock, paramsStub, spy, server;
+  var clock, paramsStub, spy, paramsStub2, server;
+  var rss = document.querySelector("rise-rss");
 
   sinon.stub(rss.$.data, "getItem", function(key, cb) {
     cb(null);
@@ -73,9 +74,16 @@
     RiseVision.RSS.setAdditionalParams(names, values);
   });
 
+  paramsStub2 = sinon.stub(rss, "go", function () {
+    // restore the function
+    paramsStub2.restore();
+    rss._onDataPingReceived();
+    // call it again with the params
+    rss.go();
+  });
+
   suite("Logging", function(){
-    var rss = document.querySelector("rise-rss"),
-      table = "rss_events",
+    var table = "rss_events",
       params = {
         "feed_url": "http://test.com/feed.rss",
         "company_id": '"companyId"',
