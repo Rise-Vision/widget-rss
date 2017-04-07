@@ -52,6 +52,10 @@
 
   var clock, paramsStub, server;
 
+  sinon.stub(rss.$.data, "getItem", function(key, cb) {
+    cb(null);
+  });
+
   paramsStub = sinon.stub(RiseVision.RSS, "setAdditionalParams", function (names, values) {
     // need to set the fake timer clock before any of the code within setAdditionalParams is executed
     clock = sinon.useFakeTimers();

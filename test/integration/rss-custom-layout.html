@@ -50,6 +50,10 @@
   <script>
     var paramsStub, server
 
+    sinon.stub(rss.$.data, "getItem", function(key, cb) {
+      cb(null);
+    });
+
     paramsStub = sinon.stub(RiseVision.RSS, "setAdditionalParams", function(additionalParams) {
       server = sinon.fakeServer.create();
       server.respondImmediately = true;

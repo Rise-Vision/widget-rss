@@ -49,6 +49,10 @@
   <script>
     var paramsStub, spy, server;
 
+    sinon.stub(rss.$.data, "getItem", function(key, cb) {
+      cb(null);
+    });
+
     paramsStub = sinon.stub(RiseVision.RSS, "setAdditionalParams", function(additionalParams) {
       spy = sinon.spy(RiseVision.Common.LoggerUtils, "logEvent");
 
