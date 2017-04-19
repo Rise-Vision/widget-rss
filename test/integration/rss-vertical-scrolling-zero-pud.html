@@ -58,7 +58,11 @@
 
 <script>
 
-  var clock, paramsStub, server;
+  var clock, paramsStub, paramsStub2, server;
+  var rss = document.querySelector("rise-rss");
+  sinon.stub(rss.$.data, "getItem", function(key, cb) {
+    cb(null);
+  });
 
   paramsStub = sinon.stub(RiseVision.RSS, "setAdditionalParams", function (names, values) {
     clock = sinon.useFakeTimers();
@@ -72,6 +76,14 @@
 
     paramsStub.restore();
     RiseVision.RSS.setAdditionalParams(names, values);
+  });
+
+  paramsStub2 = sinon.stub(rss, "go", function () {
+    // restore the function
+    paramsStub2.restore();
+    rss._onDataPingReceived();
+    // call it again with the params
+    rss.go();
   });
 
   suite("RSS Content", function() {

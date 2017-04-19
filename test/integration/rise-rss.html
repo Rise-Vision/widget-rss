@@ -51,7 +51,12 @@
 
 <script>
 
-  var clock, paramsStub, server;
+  var clock, paramsStub, paramsStub2, server;
+  var rss = document.querySelector("rise-rss");
+
+  sinon.stub(rss.$.data, "getItem", function(key, cb) {
+    cb(null);
+  });
 
   paramsStub = sinon.stub(RiseVision.RSS, "setAdditionalParams", function (names, values) {
     // need to set the fake timer clock before any of the code within setAdditionalParams is executed
@@ -70,14 +75,22 @@
     RiseVision.RSS.setAdditionalParams(names, values);
   });
 
+  paramsStub2 = sinon.stub(rss, "go", function () {
+    // restore the function
+    paramsStub2.restore();
+    rss._onDataPingReceived();
+    // call it again with the params
+    rss.go();
+  });
+
   suite("rise-rss", function() {
 
-    var rss = document.querySelector("rise-rss"),
-      spy = sinon.spy(RiseVision.RSS, "onRiseRSSInit");
+    var spy = sinon.spy(RiseVision.RSS, "onRiseRSSInit");
 
     suiteTeardown(function() {
       clock.restore();
       server.restore();
+      rss.$.data.getItem.restore();
     });
 
     suite("Initialization", function() {
@@ -122,6 +135,7 @@
       });
 
       test("should update content", function() {
+
         var headlines = document.querySelectorAll(".headline a");
         var author = document.querySelectorAll(".author");
 

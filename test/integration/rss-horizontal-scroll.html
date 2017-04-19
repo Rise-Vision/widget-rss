@@ -58,8 +58,12 @@
 <script src="../../src/widget/main.js"></script>
 
 <script>
-  var paramsStub, server, context, json,
+  var paramsStub, server, context, paramsStub2, json,
     scroller = document.querySelector("#scroller");
+  var rss = document.querySelector("rise-rss");
+  sinon.stub(rss.$.data, "getItem", function(key, cb) {
+    cb(null);
+  });
 
   paramsStub = sinon.stub(RiseVision.RSS, "setAdditionalParams", function (names, values) {
     server = sinon.fakeServer.create();
@@ -68,6 +72,14 @@
     server.respondWith(JSON.stringify(jsonRSS));
     paramsStub.restore();
     RiseVision.RSS.setAdditionalParams(names, values);
+  });
+
+  paramsStub2 = sinon.stub(rss, "go", function () {
+    // restore the function
+    paramsStub2.restore();
+    rss._onDataPingReceived();
+    // call it again with the params
+    rss.go();
   });
 
   suite("Horizontal Scroll", function() {
@@ -117,7 +129,7 @@
         "items": [{ "title": "Refreshed content" }]
       });
 
-      this.timeout(30000);
+      this.timeout(40000);
       scroller.addEventListener("done", responseHandler);
     });
 
