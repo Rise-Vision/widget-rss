@@ -78,6 +78,7 @@
     // restore the function
     paramsStub2.restore();
     rss._onDataPingReceived();
+    rss._onDisplayIdReceived();
     // call it again with the params
     rss.go();
   });
