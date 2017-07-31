@@ -78,8 +78,7 @@
     // restore the function
     paramsStub2.restore();
     rss._onDataPingReceived();
-    // call it again with the params
-    rss.go();
+    rss._onDisplayIdReceived();
   });
 
   suite("Horizontal Scroll", function() {
@@ -129,7 +128,7 @@
         "items": [{ "title": "Refreshed content" }]
       });
 
-      this.timeout(40000);
+      this.timeout(60000);
       scroller.addEventListener("done", responseHandler);
     });
 

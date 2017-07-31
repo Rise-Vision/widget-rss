@@ -85,8 +85,7 @@
     // restore the function
     paramsStub2.restore();
     rss._onDataPingReceived();
-    // call it again with the params
-    rss.go();
+    rss._onDisplayIdReceived();
   });
 
   suite("RSS Content", function() {
