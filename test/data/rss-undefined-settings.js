@@ -41,7 +41,8 @@
         }
       },
       "dataSelection": {
-        "showDescription": "snippet"
+        "showDescription": "snippet",
+        "snippetLength": 0
       }
     }
   };

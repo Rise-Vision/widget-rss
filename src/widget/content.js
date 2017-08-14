@@ -297,11 +297,15 @@ RiseVision.RSS.Content = function( prefs, params ) {
     var story = null;
 
     if ( _.has( item, "description" ) ) {
-      story = _utils.stripScripts( item.description );
-    }
 
-    if ( params.dataSelection.showDescription === "snippet" ) {
-      story = _utils.truncate( $( "<div/>" ).html( story ).text(), params.dataSelection.snippetLength );
+      if ( params.dataSelection.showDescription === "full" ) {
+
+        story = _utils.stripScripts( item.description );
+
+      } else if ( params.dataSelection.showDescription === "snippet" && params.dataSelection.snippetLength > 0 ) {
+
+        story = _utils.truncate( $( "<div/>" ).html( _utils.stripScripts( item.description ) ).text(), params.dataSelection.snippetLength );
+      }
     }
 
     return story;
