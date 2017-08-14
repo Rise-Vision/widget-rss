@@ -113,9 +113,8 @@
     });
 
     suite("Story", function() {
-      test("should truncate the story", function() {
-        var truncatedText = "Item 1 - Sample description Item 1 - Sample description Item 1 - Sample description Item 1 - Sample description Item 1 - ...";
-        assert.equal(document.querySelector(".story").innerHTML, truncatedText);
+      test("should not show story if snippetLength is not greater than 0", function() {
+        assert.equal(document.querySelector(".story").innerHTML, "");
       });
     });
 

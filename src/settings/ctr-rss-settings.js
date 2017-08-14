@@ -90,7 +90,11 @@ angular.module( "risevision.widget.rss.settings" )
 
       $scope.$watch( "settings.additionalParams.dataSelection.showDescription", function( value ) {
         if ( typeof value !== "undefined" && value !== "snippet" ) {
-          $scope.settings.additionalParams.dataSelection.snippetLength = 120;
+          if ( $scope.settings.additionalParams.dataSelection.snippetLength ) {
+            $scope.settings.additionalParams.dataSelection.snippetLength = $scope.settings.additionalParams.dataSelection.snippetLength;
+          } else {
+            $scope.settings.additionalParams.dataSelection.snippetLength = 120;
+          }
         }
       } );
 
