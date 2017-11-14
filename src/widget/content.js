@@ -31,10 +31,8 @@ RiseVision.RSS.Content = function( prefs, params ) {
   function _getImageUrl( item ) {
     var imageUrl = null;
 
-    if ( _.has( item, "enclosures" ) ) {
-      if ( item.enclosures[ 0 ] && ( _.contains( _imageTypes, item.enclosures[ 0 ].type ) ) ) {
-        imageUrl = item.enclosures[ 0 ].url;
-      }
+    if ( _.has( item, "enclosures" ) && item.enclosures[ 0 ] && ( _.contains( _imageTypes, item.enclosures[ 0 ].type ) ) ) {
+      imageUrl = item.enclosures[ 0 ].url;
     } else if ( item.image && item.image.url ) {
       imageUrl = item.image.url;
     }
