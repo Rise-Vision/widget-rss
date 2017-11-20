@@ -11,15 +11,10 @@ var jsonAtom1 = [ // eslint-disable-line
     "author": "Webmaster",
     "comments": null,
     "origlink": null,
-    "image": {},
+    "image": { "url": "http://image.test1/" },
     "source": {},
     "categories": [ "Ajax" ],
     "enclosures": [
-      {
-        "url": "http://image.test1/",
-        "type": "image/jpg",
-        "length": null
-      }
     ],
     "atom:@": {
       "xml:lang": "en"
@@ -870,4 +865,3 @@ var jsonAtom1 = [ // eslint-disable-line
     }
   }
 ];
-
