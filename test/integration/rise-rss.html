@@ -47,12 +47,133 @@
 <script src="../../src/widget/transition-no-scroll.js"></script>
 <script src="../../src/widget/content.js"></script>
 <script src="../../src/components/widget-common/dist/message.js"></script>
-<script src="../../src/widget/main.js"></script>
 
 <script>
 
   var clock, paramsStub, paramsStub2, server;
   var rss = document.querySelector("rise-rss");
+
+  function startTests() {
+    suite("rise-rss", function() {
+
+      var spy = sinon.spy(RiseVision.RSS, "onRiseRSSInit");
+
+      suiteTeardown(function() {
+        clock.restore();
+        server.restore();
+        rss.$.data.getItem.restore();
+      });
+
+      suite("Initialization", function() {
+        suiteTeardown(function() {
+          RiseVision.RSS.onRiseRSSInit.restore();
+        });
+
+        test("should set url attribute of rss component", function() {
+          assert.equal(rss.url, "http://test.com/feed.rss");
+        });
+
+        test("should set entries attribute of rss component", function() {
+          assert.equal(rss.entries, 4);
+        });
+
+        test("should call onRiseRSSInit() with rss feed data", function() {
+          assert(spy.calledWith({ "items":jsonRSS}));
+        });
+      });
+
+      suite("refresh", function() {
+        var refreshSpy;
+
+        setup(function() {
+          refreshSpy = sinon.spy(RiseVision.RSS, "onRiseRSSRefresh");
+        });
+
+        teardown(function() {
+          RiseVision.RSS.onRiseRSSRefresh.restore();
+        });
+
+        test("should call onRiseRSSRefresh() with rss feed data", function() {
+          rss.dispatchEvent(new CustomEvent("rise-rss-response", {
+            "detail": {
+              "feed": { "items" : jsonRSSUpdate }
+            },
+            "bubbles": true
+          }));
+
+          assert(refreshSpy.calledWith({ "items" : jsonRSSUpdate }));
+
+        });
+
+        test("should update content", function() {
+
+          var headlines = document.querySelectorAll(".headline a");
+          var author = document.querySelectorAll(".author");
+
+          assert.equal($(headlines[0]).eq(0).text(),
+            "RSS 2.0 & Entry 1 title", "original first item displayed");
+          assert.equal(author[0].innerHTML,
+            "Mr. X1");
+
+          assert.equal(headlines[1].innerHTML,
+            "RSS 2.0 - Entry 2 title", "original second item displayed");
+          assert.equal(author[1].innerHTML,
+            "Mr. X2");
+
+          clock.tick(10000);
+
+          headlines = document.querySelectorAll(".headline a");
+          author = document.querySelectorAll(".author");
+
+          assert.equal(headlines[0].innerHTML,
+            "RSS 2.0 - Entry 5 title", "updated first item displayed");
+          assert.equal(author[0].innerHTML,
+            "Mr. X5");
+
+          assert.equal(headlines[1].innerHTML,
+            "RSS 2.0 - Entry 6 title", "updated second item displayed");
+          assert.equal(author[1].innerHTML,
+            "Mr. X6");
+
+        });
+
+        test("should not update content when data hasn't changed", function() {
+          var headlines;
+
+          rss.dispatchEvent(new CustomEvent("rise-rss-response", {
+            "detail": {
+              "feed": { "items" : jsonRSSUpdate }
+            },
+            "bubbles": true
+          }));
+
+          clock.tick(10000);
+
+          headlines = document.querySelectorAll(".headline a");
+
+          assert.equal(headlines[0].innerHTML,
+            "RSS 2.0 - Entry 7 title", "original content continuing to transition");
+
+          assert.equal(headlines[1].innerHTML,
+            "RSS 2.0 - Entry 8 title", "original content continuing to transition");
+
+        });
+      });
+
+      suite("error", function() {
+        test("should clear content when rise-rss-error occurs", function() {
+          rss.dispatchEvent(new CustomEvent("rise-rss-error", {
+            "detail": null,
+            "bubbles": true
+          }));
+
+          assert.isNull(document.querySelector(".item"));
+
+        });
+      });
+
+    });
+  }
 
   sinon.stub(rss.$.data, "getItem", function(key, cb) {
     cb(null);
@@ -73,6 +194,7 @@
     paramsStub.restore();
     // call it again with the params
     RiseVision.RSS.setAdditionalParams(names, values);
+    startTests();
   });
 
   paramsStub2 = sinon.stub(rss, "go", function () {
@@ -82,127 +204,8 @@
     rss._onDisplayIdReceived();
   });
 
-  suite("rise-rss", function() {
-
-    var spy = sinon.spy(RiseVision.RSS, "onRiseRSSInit");
-
-    suiteTeardown(function() {
-      clock.restore();
-      server.restore();
-      rss.$.data.getItem.restore();
-    });
-
-    suite("Initialization", function() {
-      suiteTeardown(function() {
-        RiseVision.RSS.onRiseRSSInit.restore();
-      });
-
-      test("should set url attribute of rss component", function() {
-        assert.equal(rss.url, "http://test.com/feed.rss");
-      });
-
-      test("should set entries attribute of rss component", function() {
-        assert.equal(rss.entries, 4);
-      });
-
-      test("should call onRiseRSSInit() with rss feed data", function() {
-        assert(spy.calledWith({ "items":jsonRSS}));
-      });
-    });
-
-    suite("refresh", function() {
-      var refreshSpy;
-
-      setup(function() {
-        refreshSpy = sinon.spy(RiseVision.RSS, "onRiseRSSRefresh");
-      });
-
-      teardown(function() {
-        RiseVision.RSS.onRiseRSSRefresh.restore();
-      });
-
-      test("should call onRiseRSSRefresh() with rss feed data", function() {
-        rss.dispatchEvent(new CustomEvent("rise-rss-response", {
-          "detail": {
-            "feed": { "items" : jsonRSSUpdate }
-          },
-          "bubbles": true
-        }));
-
-        assert(refreshSpy.calledWith({ "items" : jsonRSSUpdate }));
-
-      });
-
-      test("should update content", function() {
-
-        var headlines = document.querySelectorAll(".headline a");
-        var author = document.querySelectorAll(".author");
-
-        assert.equal($(headlines[0]).eq(0).text(),
-          "RSS 2.0 & Entry 1 title", "original first item displayed");
-        assert.equal(author[0].innerHTML,
-          "Mr. X1");
-
-        assert.equal(headlines[1].innerHTML,
-          "RSS 2.0 - Entry 2 title", "original second item displayed");
-        assert.equal(author[1].innerHTML,
-          "Mr. X2");
-
-        clock.tick(10000);
-
-        headlines = document.querySelectorAll(".headline a");
-        author = document.querySelectorAll(".author");
-
-        assert.equal(headlines[0].innerHTML,
-          "RSS 2.0 - Entry 5 title", "updated first item displayed");
-        assert.equal(author[0].innerHTML,
-          "Mr. X5");
-
-        assert.equal(headlines[1].innerHTML,
-          "RSS 2.0 - Entry 6 title", "updated second item displayed");
-        assert.equal(author[1].innerHTML,
-          "Mr. X6");
-
-      });
-
-      test("should not update content when data hasn't changed", function() {
-        var headlines;
-
-        rss.dispatchEvent(new CustomEvent("rise-rss-response", {
-          "detail": {
-            "feed": { "items" : jsonRSSUpdate }
-          },
-          "bubbles": true
-        }));
-
-        clock.tick(10000);
-
-        headlines = document.querySelectorAll(".headline a");
-
-        assert.equal(headlines[0].innerHTML,
-          "RSS 2.0 - Entry 7 title", "original content continuing to transition");
-
-        assert.equal(headlines[1].innerHTML,
-          "RSS 2.0 - Entry 8 title", "original content continuing to transition");
-
-      });
-    });
-
-    suite("error", function() {
-      test("should clear content when rise-rss-error occurs", function() {
-        rss.dispatchEvent(new CustomEvent("rise-rss-error", {
-          "detail": null,
-          "bubbles": true
-        }));
-
-        assert.isNull(document.querySelector(".item"));
-
-      });
-    });
-
-  });
-
 </script>
+<script src="../../src/widget/main.js"></script>
 
 </body>
 </html>

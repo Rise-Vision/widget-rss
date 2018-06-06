@@ -45,11 +45,19 @@
   <script src="../../src/widget/rise-rss.js"></script>
   <script src="../../src/widget/content.js"></script>
   <script src="../../src/components/widget-common/dist/message.js"></script>
-  <script src="../../src/widget/main.js"></script>
 
   <script>
     var paramsStub, paramsStub2, server
     var rss = document.querySelector("rise-rss");
+
+    function startTests() {
+      suite("Custom Layout", function() {
+        test("should load a custom layout", function() {
+          assert.isNotNull(document.querySelector("#container template#layout"));
+        });
+      });
+    }
+
     sinon.stub(rss.$.data, "getItem", function(key, cb) {
       cb(null);
     });
@@ -61,6 +69,7 @@
 
       paramsStub.restore();
       RiseVision.RSS.setAdditionalParams(additionalParams);
+      startTests();
     });
 
     paramsStub2 = sinon.stub(rss, "go", function () {
@@ -70,11 +79,7 @@
       rss._onDisplayIdReceived();
     });
 
-    suite("Custom Layout", function() {
-     test("should load a custom layout", function() {
-        assert.isNotNull(document.querySelector("#container template#layout"));
-      });
-    });
   </script>
+  <script src="../../src/widget/main.js"></script>
 </body>
 </html>

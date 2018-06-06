@@ -46,12 +46,31 @@
 <script src="../../src/widget/transition-no-scroll.js"></script>
 <script src="../../src/widget/content.js"></script>
 <script src="../../src/components/widget-common/dist/message.js"></script>
-<script src="../../src/widget/main.js"></script>
 
 <script>
 
   var clock, paramsStub, paramsStub2, server;
   var rss = document.querySelector("rise-rss");
+
+  function startTests() {
+    suite("No Separator", function() {
+
+      suiteTeardown(function() {
+        clock.restore();
+        server.restore();
+      });
+
+      test("should set item height correctly", function() {
+        assert.equal(($("#container").height()/window.gadget.settings.additionalParams.itemsToShow) + "px" , document.querySelector(".item").style.height);
+      });
+
+      test("should not apply separator between stories", function () {
+        assert.equal(document.querySelector(".item").style.borderBottom, "");
+      });
+
+    });
+  }
+
   sinon.stub(rss.$.data, "getItem", function(key, cb) {
     cb(null);
   });
@@ -71,6 +90,7 @@
     paramsStub.restore();
     // call it again with the params
     RiseVision.RSS.setAdditionalParams(names, values);
+    startTests();
   });
 
   paramsStub2 = sinon.stub(rss, "go", function () {
@@ -80,24 +100,8 @@
     rss._onDisplayIdReceived();
   });
 
-  suite("No Separator", function() {
-
-    suiteTeardown(function() {
-      clock.restore();
-      server.restore();
-    });
-
-    test("should set item height correctly", function() {
-      assert.equal(($("#container").height()/window.gadget.settings.additionalParams.itemsToShow) + "px" , document.querySelector(".item").style.height);
-    });
-
-    test("should not apply separator between stories", function () {
-      assert.equal(document.querySelector(".item").style.borderBottom, "");
-    });
-
-  });
-
 </script>
+<script src="../../src/widget/main.js"></script>
 
 </body>
 </html>

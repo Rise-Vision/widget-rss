@@ -55,12 +55,91 @@
 <script src="../../src/widget/horizontal-scroll.js"></script>
 <script src="../../src/widget/content.js"></script>
 <script src="../../src/components/widget-common/dist/message.js"></script>
-<script src="../../src/widget/main.js"></script>
 
 <script>
   var paramsStub, server, context, paramsStub2, json,
     scroller = document.querySelector("#scroller");
   var rss = document.querySelector("rise-rss");
+
+  function startTests() {
+    suite("Horizontal Scroll", function() {
+      suiteSetup(function() {
+        var secondary = document.querySelector("#secondary");
+
+        context = secondary.getContext("2d");
+        json = JSON.parse(context.json());
+      });
+
+      suiteTeardown(function() {
+        server.restore();
+      });
+
+      test("should hide container", function() {
+        assert.equal(document.querySelector("#container").style.display, "none");
+      });
+
+      test("should show scroller", function () {
+        assert.equal(document.querySelector("#scroller").style.display, "block");
+      });
+
+      test("should start scrolling", function () {
+        var ctx = scroller.getContext("2d");
+
+        assert.isBelow(ctx.xpos, 0);
+      });
+
+      test("should scroll RSS feed data", function() {
+        assert.equal(json[5].arguments[0], "RSS 2.0 & Entry 1 title");
+      });
+
+      test("should refresh scroller after content has finished scrolling", function (done) {
+        context.clear();
+
+        var responseHandler = function() {
+          json = JSON.parse(context.json());
+
+          assert.equal(json[5].arguments[0], "Refreshed content", "text");
+          assert.equal(json[11].method, "arc", "separator");
+
+          scroller.removeEventListener("done", responseHandler);
+          done();
+        }
+
+        RiseVision.RSS.onRiseRSSRefresh({
+          "items": [{ "title": "Refreshed content" }]
+        });
+
+        this.timeout(60000);
+        scroller.addEventListener("done", responseHandler);
+      });
+
+      test("should log an error when size of the canvas is over the max size", function (done) {
+        context.clear();
+
+        var spy = sinon.spy(RiseVision.RSS, "logEvent");
+
+        RiseVision.RSS.onRiseRSSRefresh({
+          "items": jsonRssOversized
+        });
+
+        setTimeout(function(){
+          assert(spy.calledOnce);
+          assert.deepEqual(spy.args[0][0], {
+            "company_id": "\"companyId\"",
+            "display_id": "\"displayId\"",
+            "event": "error",
+            "event_details": "canvas width is over the max size",
+            "feed_url": "http://test.com/feed.rss"
+          });
+
+          RiseVision.RSS.logEvent.restore();
+          done();
+        }, 5000);
+
+      });
+    });
+  }
+
   sinon.stub(rss.$.data, "getItem", function(key, cb) {
     cb(null);
   });
@@ -72,6 +151,7 @@
     server.respondWith(JSON.stringify(jsonRSS));
     paramsStub.restore();
     RiseVision.RSS.setAdditionalParams(names, values);
+    startTests();
   });
 
   paramsStub2 = sinon.stub(rss, "go", function () {
@@ -81,83 +161,8 @@
     rss._onDisplayIdReceived();
   });
 
-  suite("Horizontal Scroll", function() {
-    suiteSetup(function() {
-      var secondary = document.querySelector("#secondary");
-
-      context = secondary.getContext("2d");
-      json = JSON.parse(context.json());
-    });
-
-    suiteTeardown(function() {
-      server.restore();
-    });
-
-    test("should hide container", function() {
-      assert.equal(document.querySelector("#container").style.display, "none");
-    });
-
-    test("should show scroller", function () {
-      assert.equal(document.querySelector("#scroller").style.display, "block");
-    });
-
-    test("should start scrolling", function () {
-      var ctx = scroller.getContext("2d");
-
-      assert.isBelow(ctx.xpos, 0);
-    });
-
-    test("should scroll RSS feed data", function() {
-      assert.equal(json[5].arguments[0], "RSS 2.0 & Entry 1 title");
-    });
-
-    test("should refresh scroller after content has finished scrolling", function (done) {
-      context.clear();
-
-      var responseHandler = function() {
-        json = JSON.parse(context.json());
-
-        assert.equal(json[5].arguments[0], "Refreshed content", "text");
-        assert.equal(json[11].method, "arc", "separator");
-
-        scroller.removeEventListener("done", responseHandler);
-        done();
-      }
-
-      RiseVision.RSS.onRiseRSSRefresh({
-        "items": [{ "title": "Refreshed content" }]
-      });
-
-      this.timeout(60000);
-      scroller.addEventListener("done", responseHandler);
-    });
-
-    test("should log an error when size of the canvas is over the max size", function (done) {
-      context.clear();
-
-      var spy = sinon.spy(RiseVision.RSS, "logEvent");
-
-      RiseVision.RSS.onRiseRSSRefresh({
-        "items": jsonRssOversized
-      });
-
-      setTimeout(function(){
-        assert(spy.calledOnce);
-        assert.deepEqual(spy.args[0][0], {
-          "company_id": "\"companyId\"",
-          "display_id": "\"displayId\"",
-          "event": "error",
-          "event_details": "canvas width is over the max size",
-          "feed_url": "http://test.com/feed.rss"
-        });
-
-        RiseVision.RSS.logEvent.restore();
-        done();
-      }, 5000);
-
-    });
-  });
 </script>
+<script src="../../src/widget/main.js"></script>
 
 </body>
 </html>

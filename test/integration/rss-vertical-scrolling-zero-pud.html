@@ -54,12 +54,36 @@
 <script src="../../src/widget/transition-vertical-scroll.js"></script>
 <script src="../../src/widget/content.js"></script>
 <script src="../../src/components/widget-common/dist/message.js"></script>
-<script src="../../src/widget/main.js"></script>
 
 <script>
 
   var clock, paramsStub, paramsStub2, server;
   var rss = document.querySelector("rise-rss");
+
+  function startTests() {
+    suite("RSS Content", function() {
+
+      suiteTeardown(function() {
+        clock.restore();
+        server.restore();
+      });
+
+      suite("PUD timer", function () {
+
+        test("should send Done based on PUD value", function() {
+          var contentDoneSpy = sinon.spy(RiseVision.RSS, "onContentDone");
+
+          clock.tick(10000);
+
+          assert(contentDoneSpy.calledOnce);
+
+          RiseVision.RSS.onContentDone.restore();
+        });
+
+      });
+    });
+  }
+
   sinon.stub(rss.$.data, "getItem", function(key, cb) {
     cb(null);
   });
@@ -76,6 +100,7 @@
 
     paramsStub.restore();
     RiseVision.RSS.setAdditionalParams(names, values);
+    startTests();
   });
 
   paramsStub2 = sinon.stub(rss, "go", function () {
@@ -85,29 +110,8 @@
     rss._onDisplayIdReceived();
   });
 
-  suite("RSS Content", function() {
-
-    suiteTeardown(function() {
-      clock.restore();
-      server.restore();
-    });
-
-    suite("PUD timer", function () {
-
-      test("should send Done based on PUD value", function() {
-        var contentDoneSpy = sinon.spy(RiseVision.RSS, "onContentDone");
-
-        clock.tick(10000);
-
-        assert(contentDoneSpy.calledOnce);
-
-        RiseVision.RSS.onContentDone.restore();
-      });
-
-    });
-  });
-
 </script>
+<script src="../../src/widget/main.js"></script>
 
 </body>
 </html>
