@@ -8,7 +8,7 @@
   <link rel="stylesheet" type="text/css" href="../../src/widget/css/rss.css">
   <link rel="stylesheet" href="../../src/components/widget-common/dist/css/message.css">
 
-  <script src="../../src/components/webcomponentsjs/webcomponents-lite.min.js"></script>
+  <script src="../../src/components/webcomponentsjs/webcomponents-loader.js"></script>
   <script src="../../src/components/web-component-tester/browser.js"></script>
 
   <link rel="import" href="../../src/components/rise-rss/rise-rss.html">
@@ -47,12 +47,78 @@
 <script src="../../src/widget/transition-no-scroll.js"></script>
 <script src="../../src/widget/content.js"></script>
 <script src="../../src/components/widget-common/dist/message.js"></script>
-<script src="../../src/widget/main.js"></script>
 
 <script>
 
   var clock, paramsStub, paramsStub2, server;
   var rss = document.querySelector("rise-rss");
+
+  function startTests() {
+    suite("New Settings", function() {
+
+      suiteTeardown(function() {
+        clock.restore();
+        server.restore();
+      });
+
+      suite("Show Title", function () {
+        test("should populate headline", function() {
+          assert.equal($(".headline a").eq(0).text(), "RSS 2.0 & Entry 1 title");
+        });
+      });
+
+      suite("Show Timestamp", function () {
+        test("should populate timestamp", function() {
+          assert.equal(document.querySelector(".timestamp").innerHTML, "June 3, 2003");
+        });
+      });
+
+      suite("Show Author", function () {
+        test("should populate author", function() {
+          assert.equal(document.querySelector(".author").innerHTML, "Mr. X1");
+        });
+      });
+
+      suite("Show Image", function () {
+        test("should populate image", function() {
+          assert.equal(document.querySelector(".image").src, "http://image.test1/");
+        });
+      });
+
+      suite("Story", function() {
+        test("should not show story if snippetLength is not greater than 0", function() {
+          assert.equal(document.querySelector(".story").innerHTML, "");
+        });
+      });
+
+      suite("Transitioning", function() {
+
+        test("should transition to next set of rss items after 10 seconds", function () {
+
+          assert.equal($(".headline a").eq(0).text(), "RSS 2.0 & Entry 1 title", "first item displaying");
+
+          clock.tick(10000);
+
+          assert.equal(document.querySelector(".headline a").innerHTML, "RSS 2.0 - Entry 2 title", "second item displaying");
+        });
+
+      });
+
+      suite("No Separator", function() {
+
+        test("should set item height correctly", function() {
+          assert.equal(($("#container").height()/window.gadget.settings.additionalParams.itemsToShow) + "px" , document.querySelector(".item").style.height);
+        });
+
+        test("should not display separator between stories", function () {
+          assert.equal(document.querySelector(".item").style.borderBottom, "");
+        });
+
+      });
+
+    });
+  }
+
   sinon.stub(rss.$.data, "getItem", function(key, cb) {
     cb(null);
   });
@@ -72,6 +138,7 @@
     paramsStub.restore();
     // call it again with the params
     RiseVision.RSS.setAdditionalParams(names, values);
+    startTests();
   });
 
   paramsStub2 = sinon.stub(rss, "go", function () {
@@ -81,71 +148,8 @@
     rss._onDisplayIdReceived();
   });
 
-  suite("New Settings", function() {
-
-    suiteTeardown(function() {
-      clock.restore();
-      server.restore();
-    });
-
-    suite("Show Title", function () {
-      test("should populate headline", function() {
-        assert.equal($(".headline a").eq(0).text(), "RSS 2.0 & Entry 1 title");
-      });
-    });
-
-    suite("Show Timestamp", function () {
-      test("should populate timestamp", function() {
-        assert.equal(document.querySelector(".timestamp").innerHTML, "June 3, 2003");
-      });
-    });
-
-    suite("Show Author", function () {
-      test("should populate author", function() {
-        assert.equal(document.querySelector(".author").innerHTML, "Mr. X1");
-      });
-    });
-
-    suite("Show Image", function () {
-      test("should populate image", function() {
-        assert.equal(document.querySelector(".image").src, "http://image.test1/");
-      });
-    });
-
-    suite("Story", function() {
-      test("should not show story if snippetLength is not greater than 0", function() {
-        assert.equal(document.querySelector(".story").innerHTML, "");
-      });
-    });
-
-    suite("Transitioning", function() {
-
-      test("should transition to next set of rss items after 10 seconds", function () {
-
-        assert.equal($(".headline a").eq(0).text(), "RSS 2.0 & Entry 1 title", "first item displaying");
-
-        clock.tick(10000);
-
-        assert.equal(document.querySelector(".headline a").innerHTML, "RSS 2.0 - Entry 2 title", "second item displaying");
-      });
-
-    });
-
-    suite("No Separator", function() {
-
-      test("should set item height correctly", function() {
-        assert.equal(($("#container").height()/window.gadget.settings.additionalParams.itemsToShow) + "px" , document.querySelector(".item").style.height);
-      });
-
-      test("should not display separator between stories", function () {
-        assert.equal(document.querySelector(".item").style.borderBottom, "");
-      });
-
-    });
-
-  });
-
 </script>
+<script src="../../src/widget/main.js"></script>
 
 </body>
 </html>

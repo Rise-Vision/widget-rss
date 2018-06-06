@@ -8,7 +8,7 @@
   <link rel="stylesheet" type="text/css" href="../../src/widget/css/rss.css">
   <link rel="stylesheet" href="../../src/components/widget-common/dist/css/message.css">
 
-  <script src="../../src/components/webcomponentsjs/webcomponents-lite.min.js"></script>
+  <script src="../../src/components/webcomponentsjs/webcomponents-loader.js"></script>
   <script src="../../src/components/web-component-tester/browser.js"></script>
 
   <link rel="import" href="../../src/components/rise-rss/rise-rss.html">
@@ -44,10 +44,38 @@
   <script src="../../src/widget/rise-rss.js"></script>
   <script src="../../src/widget/content.js"></script>
   <script src="../../src/components/widget-common/dist/message.js"></script>
-  <script src="../../src/widget/main.js"></script>
 
   <script>
     var paramsStub, spy, server;
+
+    function startTests() {
+      suite("Messaging", function() {
+        test("should show a message that the layout could not be loaded", function() {
+          assert.equal(document.querySelector(".message").innerHTML, "The layout file could not be loaded.");
+        });
+      });
+
+      suite("Logging", function() {
+        teardown(function() {
+          RiseVision.Common.LoggerUtils.logEvent.restore();
+        });
+
+        test("should log an error if the layout fails to load", function() {
+          var spyCall = RiseVision.Common.LoggerUtils.logEvent.getCall(0),
+            params = {
+              "event": "error",
+              "event_details": "layout not loaded",
+              "error_details": "/components/widget-rss/test/integration/layouts/layout-invalid.html",
+              "feed_url": "http://test.com/feed.rss",
+              "company_id": '"companyId"',
+              "display_id": '"displayId"'
+            };
+
+          assert.equal(spyCall.args[0], "rss_events");
+          assert.deepEqual(spyCall.args[1], params);
+        });
+      });
+    }
 
     paramsStub = sinon.stub(RiseVision.RSS, "setAdditionalParams", function(additionalParams) {
       spy = sinon.spy(RiseVision.Common.LoggerUtils, "logEvent");
@@ -59,34 +87,12 @@
 
       paramsStub.restore();
       RiseVision.RSS.setAdditionalParams(additionalParams);
-    });
-
-    suite("Messaging", function() {
-     test("should show a message that the layout could not be loaded", function() {
-        assert.equal(document.querySelector(".message").innerHTML, "The layout file could not be loaded.");
-      });
-    });
-
-    suite("Logging", function() {
-      teardown(function() {
-        RiseVision.Common.LoggerUtils.logEvent.restore();
-      });
-
-      test("should log an error if the layout fails to load", function() {
-        var spyCall = RiseVision.Common.LoggerUtils.logEvent.getCall(0),
-          params = {
-          "event": "error",
-          "event_details": "layout not loaded",
-          "error_details": "/components/widget-rss/test/integration/layouts/layout-invalid.html",
-          "feed_url": "http://test.com/feed.rss",
-          "company_id": '"companyId"',
-          "display_id": '"displayId"'
-        };
-
-        assert.equal(spyCall.args[0], "rss_events");
-        assert.deepEqual(spyCall.args[1], params);
-      });
+      startTests();
     });
   </script>
+  <script src="../../src/widget/main.js"></script>
+<script>
+
+</script>
 </body>
 </html>

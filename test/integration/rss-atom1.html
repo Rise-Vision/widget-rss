@@ -8,7 +8,7 @@
   <link rel="stylesheet" type="text/css" href="../../src/widget/css/rss.css">
   <link rel="stylesheet" href="../../src/components/widget-common/dist/css/message.css">
 
-  <script src="../../src/components/webcomponentsjs/webcomponents-lite.min.js"></script>
+  <script src="../../src/components/webcomponentsjs/webcomponents-loader.js"></script>
   <script src="../../src/components/web-component-tester/browser.js"></script>
 
   <link rel="import" href="../../src/components/rise-rss/rise-rss.html">
@@ -46,12 +46,102 @@
 <script src="../../src/widget/transition-no-scroll.js"></script>
 <script src="../../src/widget/content.js"></script>
 <script src="../../src/components/widget-common/dist/message.js"></script>
-<script src="../../src/widget/main.js"></script>
 
 <script>
 
   var clock, paramsStub, paramsStub2, server;
   var rss = document.querySelector("rise-rss");
+
+  function startTests() {
+    suite("RSS Content", function() {
+
+      suiteTeardown(function() {
+        clock.restore();
+        server.restore();
+      });
+
+      suite("Initialization", function () {
+        test("should set the width of the container", function() {
+          assert.equal(document.getElementById("container").style.width, window.innerWidth + "px");
+        });
+
+        test("should set the height of the container", function() {
+          assert.equal(document.getElementById("container").style.height, window.innerHeight + "px");
+        });
+      });
+
+      suite("RSS Item", function () {
+        test("should append template item", function() {
+          assert.isNotNull(document.querySelector(".item"));
+        });
+
+        test("should set item height divided by number of items to show", function() {
+          assert.equal((($("#container").height()/window.gadget.settings.additionalParams.itemsToShow) - window.gadget.settings.additionalParams.separator.size) + "px" , document.querySelector(".item").style.height);
+        });
+
+        test("should apply font styling to headline", function() {
+          assert.isNotNull(document.querySelector(".headline_font-style"));
+        });
+
+        test("should apply alignment to headline", function() {
+          assert.equal(document.querySelector(".headline").style.textAlign, "left");
+        });
+
+        test("should populate headline correctly", function() {
+          assert.equal(document.querySelector(".headline a").innerHTML,
+            "Ajax Tutorial");
+        });
+
+        test("should populate timestamp", function() {
+          assert.equal(document.querySelector(".timestamp").innerHTML, "February 10, 2007");
+        });
+
+        test("should populate author", function() {
+          assert.equal(document.querySelector(".author").innerHTML, "Webmaster");
+        });
+
+        test("should apply font styling to story", function() {
+          assert.isNotNull(document.querySelector(".story_font-style"));
+        });
+
+        test("should apply alignment to story", function() {
+          assert.equal(document.querySelector(".story").style.textAlign, "left");
+        });
+
+        test("should populate story correctly", function() {
+          assert.equal(document.querySelector(".story").innerHTML,
+            "Ajax and XMLHttpRequest with the GET, POST method for text, XML or JSON files.");
+        });
+      });
+
+      suite("Items Showing", function () {
+
+        test("should append amount of items based on number of items to show", function() {
+          assert.equal(document.querySelectorAll(".item").length, window.gadget.settings.additionalParams.itemsToShow);
+        });
+
+        test("should show first and second items", function() {
+          var headlines = document.querySelectorAll(".headline a");
+
+          assert.equal(headlines[0].innerHTML,
+            "Ajax Tutorial", "first item displaying");
+
+          assert.equal(headlines[1].innerHTML,
+            "Ajax Extensible Page", "second item displaying");
+        });
+
+        test("should show image", function() {
+          var images = document.querySelectorAll(".image");
+
+          assert.equal(images[0].src, "http://image.test1/");
+
+          assert.equal(images[1].src, "http://image.test2/");
+
+        });
+      });
+    });
+  }
+
   sinon.stub(rss.$.data, "getItem", function(key, cb) {
     cb(null);
   });
@@ -71,6 +161,7 @@
     paramsStub.restore();
     // call it again with the params
     RiseVision.RSS.setAdditionalParams(names, values);
+    startTests();
   });
 
   paramsStub2 = sinon.stub(rss, "go", function () {
@@ -80,95 +171,8 @@
     rss._onDisplayIdReceived();
   });
 
-  suite("RSS Content", function() {
-
-    suiteTeardown(function() {
-      clock.restore();
-      server.restore();
-    });
-
-    suite("Initialization", function () {
-      test("should set the width of the container", function() {
-        assert.equal(document.getElementById("container").style.width, window.innerWidth + "px");
-      });
-
-      test("should set the height of the container", function() {
-        assert.equal(document.getElementById("container").style.height, window.innerHeight + "px");
-      });
-    });
-
-    suite("RSS Item", function () {
-      test("should append template item", function() {
-        assert.isNotNull(document.querySelector(".item"));
-      });
-
-      test("should set item height divided by number of items to show", function() {
-        assert.equal((($("#container").height()/window.gadget.settings.additionalParams.itemsToShow) - window.gadget.settings.additionalParams.separator.size) + "px" , document.querySelector(".item").style.height);
-      });
-
-      test("should apply font styling to headline", function() {
-        assert.isNotNull(document.querySelector(".headline_font-style"));
-      });
-
-      test("should apply alignment to headline", function() {
-        assert.equal(document.querySelector(".headline").style.textAlign, "left");
-      });
-
-      test("should populate headline correctly", function() {
-        assert.equal(document.querySelector(".headline a").innerHTML,
-          "Ajax Tutorial");
-      });
-
-      test("should populate timestamp", function() {
-        assert.equal(document.querySelector(".timestamp").innerHTML, "February 10, 2007");
-      });
-
-      test("should populate author", function() {
-        assert.equal(document.querySelector(".author").innerHTML, "Webmaster");
-      });
-
-      test("should apply font styling to story", function() {
-        assert.isNotNull(document.querySelector(".story_font-style"));
-      });
-
-      test("should apply alignment to story", function() {
-        assert.equal(document.querySelector(".story").style.textAlign, "left");
-      });
-
-      test("should populate story correctly", function() {
-        assert.equal(document.querySelector(".story").innerHTML,
-          "Ajax and XMLHttpRequest with the GET, POST method for text, XML or JSON files.");
-      });
-    });
-
-    suite("Items Showing", function () {
-
-      test("should append amount of items based on number of items to show", function() {
-        assert.equal(document.querySelectorAll(".item").length, window.gadget.settings.additionalParams.itemsToShow);
-      });
-
-      test("should show first and second items", function() {
-        var headlines = document.querySelectorAll(".headline a");
-
-        assert.equal(headlines[0].innerHTML,
-          "Ajax Tutorial", "first item displaying");
-
-        assert.equal(headlines[1].innerHTML,
-          "Ajax Extensible Page", "second item displaying");
-      });
-
-      test("should show image", function() {
-        var images = document.querySelectorAll(".image");
-
-        assert.equal(images[0].src, "http://image.test1/");
-
-        assert.equal(images[1].src, "http://image.test2/");
-
-      });
-    });
-  });
-
 </script>
+<script src="../../src/widget/main.js"></script>
 
 </body>
 </html>

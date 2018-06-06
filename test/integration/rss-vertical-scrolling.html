@@ -8,7 +8,7 @@
   <link rel="stylesheet" type="text/css" href="../../src/widget/css/rss.css">
   <link rel="stylesheet" href="../../src/components/widget-common/dist/css/message.css">
 
-  <script src="../../src/components/webcomponentsjs/webcomponents-lite.min.js"></script>
+  <script src="../../src/components/webcomponentsjs/webcomponents-loader.js"></script>
   <script src="../../src/components/web-component-tester/browser.js"></script>
 
   <link rel="import" href="../../src/components/rise-rss/rise-rss.html">
@@ -54,13 +54,64 @@
 <script src="../../src/widget/transition-vertical-scroll.js"></script>
 <script src="../../src/widget/content.js"></script>
 <script src="../../src/components/widget-common/dist/message.js"></script>
-<script src="../../src/widget/main.js"></script>
 
 <script>
 
   var clock, paramsStub, paramsStub2, server,
     additionalParams = window.gadget.settings.additionalParams;
   var rss = document.querySelector("rise-rss");
+
+  function startTests() {
+    suite("RSS Content", function() {
+
+      suiteTeardown(function() {
+        clock.restore();
+        server.restore();
+      });
+
+      suite("Items showing", function () {
+
+        test("should append all items to page", function() {
+          assert.equal(document.querySelectorAll(".item").length, jsonRSS.length);
+        });
+
+      });
+
+      suite("auto-scroll instantiation", function () {
+
+        test("should revise HTML markup for auto-scroll purposes", function () {
+          assert.isNotNull(document.querySelector("#container div section.page"));
+        });
+
+        test("should apply auto-scroll specific css", function () {
+          assert.equal(document.querySelector("#container").style.overflow, "hidden");
+          assert.equal(document.querySelector("#container").style.cursor, "move");
+        });
+
+        test("should set by option", function () {
+          assert.equal($("#container").data("plugin_autoScroll").options.by, "continuous");
+        });
+
+        test("should set speed option", function () {
+          assert.equal($("#container").data("plugin_autoScroll").options.speed,
+            additionalParams.transition.speed);
+        });
+
+        test("should set duration option", function () {
+          assert.equal($("#container").data("plugin_autoScroll").options.duration,
+            additionalParams.transition.duration);
+        });
+
+        test("should set pause option", function () {
+          assert.equal($("#container").data("plugin_autoScroll").options.pause,
+            additionalParams.transition.resume);
+        });
+
+      });
+
+    });
+  }
+
   sinon.stub(rss.$.data, "getItem", function(key, cb) {
     cb(null);
   });
@@ -80,6 +131,7 @@
     paramsStub.restore();
     // call it again with the params
     RiseVision.RSS.setAdditionalParams(names, values);
+    startTests();
   });
 
   paramsStub2 = sinon.stub(rss, "go", function () {
@@ -89,56 +141,8 @@
     rss._onDisplayIdReceived();
   });
 
-  suite("RSS Content", function() {
-
-    suiteTeardown(function() {
-      clock.restore();
-      server.restore();
-    });
-
-    suite("Items showing", function () {
-
-      test("should append all items to page", function() {
-        assert.equal(document.querySelectorAll(".item").length, jsonRSS.length);
-      });
-
-    });
-
-    suite("auto-scroll instantiation", function () {
-
-      test("should revise HTML markup for auto-scroll purposes", function () {
-        assert.isNotNull(document.querySelector("#container div section.page"));
-      });
-
-      test("should apply auto-scroll specific css", function () {
-        assert.equal(document.querySelector("#container").style.overflow, "hidden");
-        assert.equal(document.querySelector("#container").style.cursor, "move");
-      });
-
-      test("should set by option", function () {
-        assert.equal($("#container").data("plugin_autoScroll").options.by, "continuous");
-      });
-
-      test("should set speed option", function () {
-        assert.equal($("#container").data("plugin_autoScroll").options.speed,
-          additionalParams.transition.speed);
-      });
-
-      test("should set duration option", function () {
-        assert.equal($("#container").data("plugin_autoScroll").options.duration,
-          additionalParams.transition.duration);
-      });
-
-      test("should set pause option", function () {
-        assert.equal($("#container").data("plugin_autoScroll").options.pause,
-          additionalParams.transition.resume);
-      });
-
-    });
-
-  });
-
 </script>
+<script src="../../src/widget/main.js"></script>
 
 </body>
 </html>

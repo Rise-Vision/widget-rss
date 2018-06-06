@@ -8,7 +8,7 @@
   <link rel="stylesheet" type="text/css" href="../../src/widget/css/rss.css">
   <link rel="stylesheet" href="../../src/components/widget-common/dist/css/message.css">
 
-  <script src="../../src/components/webcomponentsjs/webcomponents-lite.min.js"></script>
+  <script src="../../src/components/webcomponentsjs/webcomponents-loader.js"></script>
   <script src="../../src/components/web-component-tester/browser.js"></script>
 
   <link rel="import" href="../../src/components/rise-rss/rise-rss.html">
@@ -46,11 +46,175 @@
 <script src="../../src/widget/transition-no-scroll.js"></script>
 <script src="../../src/widget/content.js"></script>
 <script src="../../src/components/widget-common/dist/message.js"></script>
-<script src="../../src/widget/main.js"></script>
 
 <script>
 
   var clock, paramsStub, server;
+
+  function startTests() {
+    suite("Logging", function(){
+      var rss = document.querySelector("rise-rss"),
+        table = "rss_events",
+        params = {
+          "feed_url": "http://test.com/feed.rss",
+          "company_id": '"companyId"',
+          "display_id": '"displayId"'
+        },
+        playStub;
+
+      suiteSetup(function() {
+        playStub = sinon.stub(RiseVision.RSS, "play");
+      });
+
+      suiteTeardown(function() {
+        playStub.restore();
+        server.restore();
+        clock.restore();
+      });
+
+      teardown(function() {
+        RiseVision.Common.LoggerUtils.logEvent.restore();
+      });
+
+      suite("rise-rss-error", function() {
+        var spyCall;
+
+        test("should log a rise rss error with non-makeRequest detail", function(done) {
+          spy = sinon.spy(RiseVision.Common.LoggerUtils, "logEvent");
+
+          rss.dispatchEvent(new CustomEvent("rise-rss-error", {
+            "detail": "Invalid RSS feed",
+            "bubbles": true
+          }));
+
+          params.event = "error";
+          params.event_details = "rise rss error";
+          params.error_details = "Invalid RSS feed";
+
+          assert(spy.calledOnce);
+          assert(spy.calledWith(table, params));
+          done();
+        });
+
+        test("should log a rise rss error with makeRequest detail", function() {
+          var exampleMakeRequestMessage = "404 Cannot GET /gadgets/makeRequest?url=http%3A%2F%2Ftest.com%2Ffeed.rss";
+
+          spy = sinon.spy(RiseVision.Common.LoggerUtils, "logEvent");
+
+          rss.dispatchEvent(new CustomEvent("rise-rss-error", {
+            "detail": [
+              exampleMakeRequestMessage
+            ],
+            "bubbles": true
+          }));
+
+          params.event = "error";
+          params.event_details = "rise rss error";
+          params.error_details = exampleMakeRequestMessage;
+
+          assert(spy.calledOnce);
+          assert(spy.calledWith(table, params));
+        });
+
+        test("should log a rise rss error when done is fired", function() {
+          rss.dispatchEvent(new CustomEvent("rise-rss-error", {
+            "detail": "Invalid RSS feed",
+            "bubbles": true
+          }));
+
+          spy = sinon.spy(RiseVision.Common.LoggerUtils, "logEvent");
+
+          clock.tick(5000);
+
+          assert(spy.calledTwice);  // rise rss error + done
+
+          spyCall = RiseVision.Common.LoggerUtils.logEvent.getCall(0);
+
+          params.error_details = "Invalid RSS feed";
+
+          assert.equal(spyCall.args[0], table);
+          assert.deepEqual(spyCall.args[1], params);
+        });
+
+        test("should log a rise rss error if the feed is not an RSS feed", function(done) {
+          spy = sinon.spy(RiseVision.Common.LoggerUtils, "logEvent");
+
+          rss.dispatchEvent(new CustomEvent("rise-rss-error", {
+            "detail": "Not a feed",
+            "bubbles": true
+          }));
+
+          params.error_details = "Not a feed";
+
+          assert(spy.calledOnce);
+          assert(spy.calledWith(table, params));
+          done();
+        });
+
+        test("should not log a rise rss error when done is fired if the error has resolved itself on a refresh", function() {
+          rss.dispatchEvent(new CustomEvent("rise-rss-error", {
+            "detail": "Invalid RSS feed",
+            "bubbles": true
+          }));
+
+          console.log(jsonRSS);
+
+          // Resolve the error.
+          RiseVision.RSS.onRiseRSSRefresh({"items" : jsonRSS});
+
+          spy = sinon.spy(RiseVision.Common.LoggerUtils, "logEvent");
+
+          params.event = "done";
+          delete params.error_details;
+          delete params.event_details;
+
+          clock.tick(5000);
+
+          assert.equal(spy.callCount, 1, "called once");
+          assert(spy.calledWith(table, params));
+        });
+
+        test("should log a feed authentication error if the feed requires authentication", function(done) {
+          spy = sinon.spy(RiseVision.Common.LoggerUtils, "logEvent");
+
+          rss.dispatchEvent(new CustomEvent("rise-rss-error", {
+            "detail": "401 Unauthorized",
+            "bubbles": true
+          }));
+
+          params.event = "error";
+          params.event_details = "feed authentication error";
+          params.error_details = "401 Unauthorized";
+
+          assert(spy.calledOnce);
+          assert(spy.calledWith(table, params));
+          done();
+        });
+
+        test("should log a feed not found error", function(done) {
+          spy = sinon.spy(RiseVision.Common.LoggerUtils, "logEvent");
+
+          rss.dispatchEvent(new CustomEvent("rise-rss-error", {
+            "detail": "404 Not Found",
+            "bubbles": true
+          }));
+
+          params.event = "error";
+          params.event_details = "feed not found";
+          params.error_details = "404 Not Found";
+
+          assert(spy.calledOnce);
+          assert(spy.calledWith(table, params));
+          done();
+        });
+      });
+
+    });
+  }
+
+  sinon.stub(rss.$.data, "getItem", function(key, cb) {
+    cb(null);
+  });
 
   paramsStub = sinon.stub(RiseVision.RSS, "setAdditionalParams", function (names, values) {
     // need to set the fake timer clock before any of the code within setAdditionalParams is executed
@@ -67,166 +231,11 @@
     paramsStub.restore();
     // call it again with the params
     RiseVision.RSS.setAdditionalParams(names, values);
-  });
-
-  suite("Logging", function(){
-    var rss = document.querySelector("rise-rss"),
-      table = "rss_events",
-      params = {
-        "feed_url": "http://test.com/feed.rss",
-        "company_id": '"companyId"',
-        "display_id": '"displayId"'
-      },
-      playStub;
-
-    suiteSetup(function() {
-      playStub = sinon.stub(RiseVision.RSS, "play");
-    });
-
-    suiteTeardown(function() {
-      playStub.restore();
-      server.restore();
-      clock.restore();
-    });
-
-    teardown(function() {
-      RiseVision.Common.LoggerUtils.logEvent.restore();
-    });
-
-    suite("rise-rss-error", function() {
-      var spyCall;
-
-      test("should log a rise rss error with non-makeRequest detail", function(done) {
-        spy = sinon.spy(RiseVision.Common.LoggerUtils, "logEvent");
-
-        rss.dispatchEvent(new CustomEvent("rise-rss-error", {
-          "detail": "Invalid RSS feed",
-          "bubbles": true
-        }));
-
-        params.event = "error";
-        params.event_details = "rise rss error";
-        params.error_details = "Invalid RSS feed";
-
-        assert(spy.calledOnce);
-        assert(spy.calledWith(table, params));
-        done();
-      });
-
-      test("should log a rise rss error with makeRequest detail", function() {
-        var exampleMakeRequestMessage = "404 Cannot GET /gadgets/makeRequest?url=http%3A%2F%2Ftest.com%2Ffeed.rss";
-
-        spy = sinon.spy(RiseVision.Common.LoggerUtils, "logEvent");
-
-        rss.dispatchEvent(new CustomEvent("rise-rss-error", {
-          "detail": [
-            exampleMakeRequestMessage
-          ],
-          "bubbles": true
-        }));
-
-        params.event = "error";
-        params.event_details = "rise rss error";
-        params.error_details = exampleMakeRequestMessage;
-
-        assert(spy.calledOnce);
-        assert(spy.calledWith(table, params));
-      });
-
-      test("should log a rise rss error when done is fired", function() {
-        rss.dispatchEvent(new CustomEvent("rise-rss-error", {
-          "detail": "Invalid RSS feed",
-          "bubbles": true
-        }));
-
-        spy = sinon.spy(RiseVision.Common.LoggerUtils, "logEvent");
-
-        clock.tick(5000);
-
-        assert(spy.calledTwice);  // rise rss error + done
-
-        spyCall = RiseVision.Common.LoggerUtils.logEvent.getCall(0);
-
-        params.error_details = "Invalid RSS feed";
-
-        assert.equal(spyCall.args[0], table);
-        assert.deepEqual(spyCall.args[1], params);
-      });
-
-      test("should log a rise rss error if the feed is not an RSS feed", function(done) {
-        spy = sinon.spy(RiseVision.Common.LoggerUtils, "logEvent");
-
-        rss.dispatchEvent(new CustomEvent("rise-rss-error", {
-          "detail": "Not a feed",
-          "bubbles": true
-        }));
-
-        params.error_details = "Not a feed";
-
-        assert(spy.calledOnce);
-        assert(spy.calledWith(table, params));
-        done();
-      });
-
-      test("should not log a rise rss error when done is fired if the error has resolved itself on a refresh", function() {
-        rss.dispatchEvent(new CustomEvent("rise-rss-error", {
-          "detail": "Invalid RSS feed",
-          "bubbles": true
-        }));
-
-        // Resolve the error.
-        RiseVision.RSS.onRiseRSSRefresh({"items" : jsonRSS});
-
-        spy = sinon.spy(RiseVision.Common.LoggerUtils, "logEvent");
-
-        params.event = "done";
-        delete params.error_details;
-        delete params.event_details;
-
-        clock.tick(5000);
-
-        assert.equal(spy.callCount, 1, "called once");
-        assert(spy.calledWith(table, params));
-      });
-
-      test("should log a feed authentication error if the feed requires authentication", function(done) {
-        spy = sinon.spy(RiseVision.Common.LoggerUtils, "logEvent");
-
-        rss.dispatchEvent(new CustomEvent("rise-rss-error", {
-          "detail": "401 Unauthorized",
-          "bubbles": true
-        }));
-
-        params.event = "error";
-        params.event_details = "feed authentication error";
-        params.error_details = "401 Unauthorized";
-
-        assert(spy.calledOnce);
-        assert(spy.calledWith(table, params));
-        done();
-      });
-
-      test("should log a feed not found error", function(done) {
-        spy = sinon.spy(RiseVision.Common.LoggerUtils, "logEvent");
-
-        rss.dispatchEvent(new CustomEvent("rise-rss-error", {
-          "detail": "404 Not Found",
-          "bubbles": true
-        }));
-
-        params.event = "error";
-        params.event_details = "feed not found";
-        params.error_details = "404 Not Found";
-
-        assert(spy.calledOnce);
-        assert(spy.calledWith(table, params));
-        done();
-      });
-    });
-
+    startTests();
   });
 
 </script>
+<script src="../../src/widget/main.js"></script>
 
 </body>
 </html>

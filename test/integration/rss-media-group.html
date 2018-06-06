@@ -8,7 +8,7 @@
   <link rel="stylesheet" type="text/css" href="../../src/widget/css/rss.css">
   <link rel="stylesheet" href="../../src/components/widget-common/dist/css/message.css">
 
-  <script src="../../src/components/webcomponentsjs/webcomponents-lite.min.js"></script>
+  <script src="../../src/components/webcomponentsjs/webcomponents-loader.js"></script>
   <script src="../../src/components/web-component-tester/browser.js"></script>
 
   <link rel="import" href="../../src/components/rise-rss/rise-rss.html">
@@ -46,12 +46,40 @@
 <script src="../../src/widget/transition-no-scroll.js"></script>
 <script src="../../src/widget/content.js"></script>
 <script src="../../src/components/widget-common/dist/message.js"></script>
-<script src="../../src/widget/main.js"></script>
 
 <script>
 
   var clock, paramsStub, paramsStub2, server;
   var rss = document.querySelector("rise-rss");
+
+  function startTests() {
+    suite("New Settings", function() {
+
+      suiteTeardown(function() {
+        clock.restore();
+        server.restore();
+      });
+
+      suite("Show Title", function () {
+        test("should populate headline", function() {
+          assert.equal(document.querySelector(".headline a").innerHTML, "RSS 2.0 – Entry 1 title");
+        });
+      });
+
+      suite("Show Timestamp", function () {
+        test("should populate timestamp", function() {
+          assert.equal(document.querySelector(".timestamp").innerHTML, "June 3, 2003");
+        });
+      });
+
+      suite("Show Author", function () {
+        test("should populate author", function() {
+          assert.equal(document.querySelector(".author").innerHTML, "Mr. X1");
+        });
+      });
+    });
+  }
+
   sinon.stub(rss.$.data, "getItem", function(key, cb) {
     cb(null);
   });
@@ -71,6 +99,7 @@
     paramsStub.restore();
     // call it again with the params
     RiseVision.RSS.setAdditionalParams(names, values);
+    startTests();
   });
 
   paramsStub2 = sinon.stub(rss, "go", function () {
@@ -80,33 +109,8 @@
     rss._onDisplayIdReceived();
   });
 
-  suite("New Settings", function() {
-
-    suiteTeardown(function() {
-      clock.restore();
-      server.restore();
-    });
-
-    suite("Show Title", function () {
-      test("should populate headline", function() {
-        assert.equal(document.querySelector(".headline a").innerHTML, "RSS 2.0 – Entry 1 title");
-      });
-    });
-
-    suite("Show Timestamp", function () {
-      test("should populate timestamp", function() {
-        assert.equal(document.querySelector(".timestamp").innerHTML, "June 3, 2003");
-      });
-    });
-
-    suite("Show Author", function () {
-      test("should populate author", function() {
-        assert.equal(document.querySelector(".author").innerHTML, "Mr. X1");
-      });
-    });
-  });
-
 </script>
+<script src="../../src/widget/main.js"></script>
 
 </body>
 </html>

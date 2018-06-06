@@ -8,7 +8,7 @@
   <link rel="stylesheet" type="text/css" href="../../src/widget/css/rss.css">
   <link rel="stylesheet" href="../../src/components/widget-common/dist/css/message.css">
 
-  <script src="../../src/components/webcomponentsjs/webcomponents-lite.min.js"></script>
+  <script src="../../src/components/webcomponentsjs/webcomponents-loader.js"></script>
   <script src="../../src/components/web-component-tester/browser.js"></script>
 
   <link rel="import" href="../../src/components/rise-rss/rise-rss.html">
@@ -46,12 +46,99 @@
 <script src="../../src/widget/transition-no-scroll.js"></script>
 <script src="../../src/widget/content.js"></script>
 <script src="../../src/components/widget-common/dist/message.js"></script>
-<script src="../../src/widget/main.js"></script>
 
 <script>
 
   var clock, paramsStub, spy, paramsStub2, server;
   var rss = document.querySelector("rise-rss");
+
+  function startTests() {
+    suite("Logging", function(){
+      var table = "rss_events",
+        params = {
+          "feed_url": "http://test.com/feed.rss",
+          "company_id": '"companyId"',
+          "display_id": '"displayId"'
+        };
+
+      suiteTeardown(function() {
+        clock.restore();
+        server.restore();
+      });
+
+      setup(function() {
+        spy = sinon.spy(RiseVision.Common.LoggerUtils, "logEvent");
+      });
+
+      teardown(function() {
+        RiseVision.Common.LoggerUtils.logEvent.restore();
+      });
+
+      suite("play", function() {
+
+        test("should log the play event", function() {
+          RiseVision.RSS.play();
+
+          params.event = "play";
+
+          assert(spy.calledOnce);
+          assert(spy.calledWith(table, params));
+        });
+
+      });
+
+      suite("done", function() {
+
+        setup(function() {
+          sinon.stub(RiseVision.RSS, "play");
+        });
+
+        teardown(function(){
+          RiseVision.RSS.play.restore();
+        });
+
+        test("should log the done event when all items have displayed", function() {
+          // move clock to past last interval of transitioning items
+          clock.tick(20000);
+
+          params.event = "done";
+
+          assert(spy.calledOnce);
+          assert(spy.calledWith(table, params));
+        });
+
+      });
+
+      suite("no feed items", function() {
+
+        test("should log no feed items error when initializing", function() {
+          RiseVision.RSS.onRiseRSSInit({
+            items: []
+          });
+
+          params.event = "error";
+          params.event_details = "no feed items";
+
+          assert(spy.calledOnce);
+          assert(spy.calledWith(table, params));
+        });
+
+        test("should log no feed items error when refreshing", function() {
+          RiseVision.RSS.onRiseRSSRefresh({
+            items: []
+          });
+
+          params.event = "error";
+          params.event_details = "no feed items";
+
+          assert(spy.calledOnce);
+          assert(spy.calledWith(table, params));
+        });
+
+      });
+
+    });
+  }
 
   sinon.stub(rss.$.data, "getItem", function(key, cb) {
     cb(null);
@@ -72,6 +159,7 @@
     paramsStub.restore();
     // call it again with the params
     RiseVision.RSS.setAdditionalParams(names, values);
+    startTests();
   });
 
   paramsStub2 = sinon.stub(rss, "go", function () {
@@ -83,93 +171,8 @@
     rss.go();
   });
 
-  suite("Logging", function(){
-    var table = "rss_events",
-      params = {
-        "feed_url": "http://test.com/feed.rss",
-        "company_id": '"companyId"',
-        "display_id": '"displayId"'
-      };
-
-    suiteTeardown(function() {
-      clock.restore();
-      server.restore();
-    });
-
-    setup(function() {
-      spy = sinon.spy(RiseVision.Common.LoggerUtils, "logEvent");
-    });
-
-    teardown(function() {
-      RiseVision.Common.LoggerUtils.logEvent.restore();
-    });
-
-    suite("play", function() {
-
-      test("should log the play event", function() {
-        RiseVision.RSS.play();
-
-        params.event = "play";
-
-        assert(spy.calledOnce);
-        assert(spy.calledWith(table, params));
-      });
-
-    });
-
-    suite("done", function() {
-
-      setup(function() {
-        sinon.stub(RiseVision.RSS, "play");
-      });
-
-      teardown(function(){
-        RiseVision.RSS.play.restore();
-      });
-
-      test("should log the done event when all items have displayed", function() {
-        // move clock to past last interval of transitioning items
-        clock.tick(20000);
-
-        params.event = "done";
-
-        assert(spy.calledOnce);
-        assert(spy.calledWith(table, params));
-      });
-
-    });
-
-    suite("no feed items", function() {
-
-      test("should log no feed items error when initializing", function() {
-        RiseVision.RSS.onRiseRSSInit({
-          items: []
-        });
-
-        params.event = "error";
-        params.event_details = "no feed items";
-
-        assert(spy.calledOnce);
-        assert(spy.calledWith(table, params));
-      });
-
-      test("should log no feed items error when refreshing", function() {
-        RiseVision.RSS.onRiseRSSRefresh({
-          items: []
-        });
-
-        params.event = "error";
-        params.event_details = "no feed items";
-
-        assert(spy.calledOnce);
-        assert(spy.calledWith(table, params));
-      });
-
-    });
-
-  });
-
 </script>
+<script src="../../src/widget/main.js"></script>
 
 </body>
 </html>
