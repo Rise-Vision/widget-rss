@@ -23,7 +23,7 @@ At this time Chrome is the only browser that this project and Rise Vision suppor
 ### Custom Layout
 
 For using custom layout you will need to have a template, like the one shown below, hosted somewhere accessible through the internet. The RSS content placement on the template is based on the element classes. Thus, you can change the elements as you wish as long as the classes are maintained.
-Moreover, you can also add your own styling through inline css. Once you have your template ready you can set its url on the widget settings under 
+Moreover, you can also add your own styling through inline css. Once you have your template ready you can set its url on the widget settings under
 Custom Layout URL.
 
 ```html
@@ -75,7 +75,7 @@ Next, perform these additional steps at the command line:
 cd widget-rss
 npm install
 bower install
-gulp build
+npm run build
 ```
 
 The source code for the Widget can be found in the `src` folder, and this is where you can make any necessary code changes.
