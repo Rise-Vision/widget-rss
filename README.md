@@ -123,7 +123,3 @@ If you have any questions or problems, please don't hesitate to join our lively 
 If you are looking for user documentation on Rise Vision, please see http://www.risevision.com/help/users/
 
 If you would like more information on developing applications for Rise Vision, please visit http://www.risevision.com/help/developers/.
-
-**Facilitator**
-
-[Rodrigo Serviuc Pavezi](https://github.com/rodrigopavezi "Rodrigo Serviuc Pavezi")
