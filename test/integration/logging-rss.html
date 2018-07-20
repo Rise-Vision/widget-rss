@@ -66,15 +66,36 @@
         server.restore();
       });
 
-      setup(function() {
-        spy = sinon.spy(RiseVision.Common.LoggerUtils, "logEvent");
-      });
+      suite("configuration", function() {
 
-      teardown(function() {
-        RiseVision.Common.LoggerUtils.logEvent.restore();
+        suiteTeardown(function() {
+          spy.restore();
+        });
+
+        test("should log the configuration event with correct details", function() {
+          var details = {
+            layout: "layout-4x1",
+            layoutUrl: null
+          };
+
+          params.event = "configuration";
+          params.event_details = JSON.stringify( details );
+
+          assert(spy.calledOnce);
+          assert(spy.calledWith(table, params));
+        });
+
       });
 
       suite("no feed items", function() {
+
+        setup(function() {
+          spy = sinon.spy(RiseVision.Common.LoggerUtils, "logEvent");
+        });
+
+        teardown(function() {
+          spy.restore();
+        });
 
         test("should log no feed items error when initializing", function() {
           RiseVision.RSS.onRiseRSSInit({
@@ -119,6 +140,8 @@
     server.respondWith("GET", "/components/widget-rss/test/integration/layouts/layout-4x1.html",
       [200, { "Content-Type": "text/html" }, layout]);
     server.respondWith(JSON.stringify(jsonRSS));
+
+    spy = sinon.spy(RiseVision.Common.LoggerUtils, "logEvent");
 
     // restore the function
     paramsStub.restore();

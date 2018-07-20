@@ -28,6 +28,20 @@ RiseVision.RSS = ( function( document, gadgets ) {
     gadgets.rpc.call( "", "rsevent_done", null, _prefs.getString( "id" ) );
   }
 
+  function _logConfiguration() {
+    var layout = _isHorizontalScroll() ? "horizontal" : _additionalParams.layout,
+      details = {
+        layout: layout,
+        layoutUrl: layout === "custom" ? _additionalParams.layoutUrl : null
+      };
+
+    logEvent( {
+      event: "configuration",
+      event_details: JSON.stringify( details ),
+      feed_url: _additionalParams.url
+    } );
+  }
+
   function _noFeedItems() {
     var params = {
       "event": "error",
@@ -283,6 +297,8 @@ RiseVision.RSS = ( function( document, gadgets ) {
 
     document.getElementById( "container" ).style.width = _additionalParams.width + "px";
     document.getElementById( "container" ).style.height = _additionalParams.height + "px";
+
+    _logConfiguration();
 
     if ( _isHorizontalScroll() ) {
       _initHorizontalScroll();
