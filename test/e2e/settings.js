@@ -1,4 +1,4 @@
-/* global require, browser, describe, before, beforeEach, it, element, by */
+/* global require, browser, describe, before, beforeEach, it, element, by, xit */
 
 /* eslint-disable func-names */
 
@@ -29,19 +29,19 @@
         expect( element( by.css( "button#cancel" ) ).isPresent() ).to.eventually.be.true;
       } );
 
-      it( "Should load Title Font Setting component", function() {
+      xit( "Should load Title Font Setting component", function() {
         expect( element( by.css( "#title-font .mce-tinymce" ) ).isPresent() ).to.eventually.be.true;
       } );
 
-      it( "Should load Description Font Setting component", function() {
+      xit( "Should load Description Font Setting component", function() {
         expect( element( by.css( "#story-font .mce-tinymce" ) ).isPresent() ).to.eventually.be.true;
       } );
 
-      it( "Should load Timestamp Font Setting component", function() {
+      xit( "Should load Timestamp Font Setting component", function() {
         expect( element( by.css( "#timestamp-font .mce-tinymce" ) ).isPresent() ).to.eventually.be.true;
       } );
 
-      it( "Should load Author Font Setting component", function() {
+      xit( "Should load Author Font Setting component", function() {
         expect( element( by.css( "#author-font .mce-tinymce" ) ).isPresent() ).to.eventually.be.true;
       } );
 
