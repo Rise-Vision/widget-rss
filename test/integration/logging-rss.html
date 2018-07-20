@@ -74,41 +74,6 @@
         RiseVision.Common.LoggerUtils.logEvent.restore();
       });
 
-      suite("play", function() {
-
-        test("should log the play event", function() {
-          RiseVision.RSS.play();
-
-          params.event = "play";
-
-          assert(spy.calledOnce);
-          assert(spy.calledWith(table, params));
-        });
-
-      });
-
-      suite("done", function() {
-
-        setup(function() {
-          sinon.stub(RiseVision.RSS, "play");
-        });
-
-        teardown(function(){
-          RiseVision.RSS.play.restore();
-        });
-
-        test("should log the done event when all items have displayed", function() {
-          // move clock to past last interval of transitioning items
-          clock.tick(20000);
-
-          params.event = "done";
-
-          assert(spy.calledOnce);
-          assert(spy.calledWith(table, params));
-        });
-
-      });
-
       suite("no feed items", function() {
 
         test("should log no feed items error when initializing", function() {
