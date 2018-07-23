@@ -91,7 +91,9 @@
         "show": true,
         "size": 1,
         "color": "rgb(238,238,238)"
-      }
+      },
+      "layout": "layout-4x1",
+      "layoutUrl": ""
     }
   };
 } )( window );

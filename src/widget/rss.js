@@ -15,7 +15,6 @@ RiseVision.RSS = ( function( document, gadgets ) {
     _currentFeed = null,
     _viewerPaused = true,
     _errorTimer = null,
-    _errorLog = null,
     _errorFlag = false;
 
   /*
@@ -27,14 +26,20 @@ RiseVision.RSS = ( function( document, gadgets ) {
 
   function _done() {
     gadgets.rpc.call( "", "rsevent_done", null, _prefs.getString( "id" ) );
+  }
 
-    // Any errors need to be logged before the done event.
-    if ( _errorLog !== null ) {
-      logEvent( _errorLog, true );
-    }
+  function _logConfiguration() {
+    var layout = _isHorizontalScroll() ? "horizontal" : _additionalParams.layout,
+      details = {
+        layout: layout,
+        layoutUrl: layout === "custom" ? _additionalParams.layoutUrl : null
+      };
 
-    // log "done" event
-    logEvent( { "event": "done", "feed_url": _additionalParams.url }, false );
+    logEvent( {
+      event: "configuration",
+      event_details: JSON.stringify( details ),
+      feed_url: _additionalParams.url
+    } );
   }
 
   function _noFeedItems() {
@@ -44,7 +49,7 @@ RiseVision.RSS = ( function( document, gadgets ) {
       "feed_url": _additionalParams.url
     };
 
-    logEvent( params, true );
+    logEvent( params );
     showError( "There are no items to show from this RSS feed." );
   }
 
@@ -158,7 +163,7 @@ RiseVision.RSS = ( function( document, gadgets ) {
       "event_details": "layout not loaded",
       "error_details": url,
       "feed_url": _additionalParams.url
-    }, true );
+    } );
 
     _ready();
   }
@@ -191,11 +196,7 @@ RiseVision.RSS = ( function( document, gadgets ) {
     return "rss_events";
   }
 
-  function logEvent( params, isError ) {
-    if ( isError ) {
-      _errorLog = params;
-    }
-
+  function logEvent( params ) {
     RiseVision.Common.LoggerUtils.logEvent( getTableName(), params );
   }
 
@@ -254,7 +255,6 @@ RiseVision.RSS = ( function( document, gadgets ) {
 
         // refreshed feed fixed previous error, ensure flag is removed so next playback shows content
         _errorFlag = false;
-        _errorLog = null;
       } else {
         _content.update( feed );
       }
@@ -278,8 +278,6 @@ RiseVision.RSS = ( function( document, gadgets ) {
   function play() {
     _viewerPaused = false;
 
-    logEvent( { "event": "play", "feed_url": _additionalParams.url }, false );
-
     if ( _errorFlag ) {
       _startErrorTimer();
       return;
@@ -299,6 +297,8 @@ RiseVision.RSS = ( function( document, gadgets ) {
 
     document.getElementById( "container" ).style.width = _additionalParams.width + "px";
     document.getElementById( "container" ).style.height = _additionalParams.height + "px";
+
+    _logConfiguration();
 
     if ( _isHorizontalScroll() ) {
       _initHorizontalScroll();
