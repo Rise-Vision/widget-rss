@@ -66,42 +66,20 @@
         server.restore();
       });
 
-      setup(function() {
-        spy = sinon.spy(RiseVision.Common.LoggerUtils, "logEvent");
-      });
+      suite("configuration", function() {
 
-      teardown(function() {
-        RiseVision.Common.LoggerUtils.logEvent.restore();
-      });
-
-      suite("play", function() {
-
-        test("should log the play event", function() {
-          RiseVision.RSS.play();
-
-          params.event = "play";
-
-          assert(spy.calledOnce);
-          assert(spy.calledWith(table, params));
+        suiteTeardown(function() {
+          spy.restore();
         });
 
-      });
+        test("should log the configuration event with correct details", function() {
+          var details = {
+            layout: "layout-4x1",
+            layoutUrl: null
+          };
 
-      suite("done", function() {
-
-        setup(function() {
-          sinon.stub(RiseVision.RSS, "play");
-        });
-
-        teardown(function(){
-          RiseVision.RSS.play.restore();
-        });
-
-        test("should log the done event when all items have displayed", function() {
-          // move clock to past last interval of transitioning items
-          clock.tick(20000);
-
-          params.event = "done";
+          params.event = "configuration";
+          params.event_details = JSON.stringify( details );
 
           assert(spy.calledOnce);
           assert(spy.calledWith(table, params));
@@ -110,6 +88,14 @@
       });
 
       suite("no feed items", function() {
+
+        setup(function() {
+          spy = sinon.spy(RiseVision.Common.LoggerUtils, "logEvent");
+        });
+
+        teardown(function() {
+          spy.restore();
+        });
 
         test("should log no feed items error when initializing", function() {
           RiseVision.RSS.onRiseRSSInit({
@@ -154,6 +140,8 @@
     server.respondWith("GET", "/components/widget-rss/test/integration/layouts/layout-4x1.html",
       [200, { "Content-Type": "text/html" }, layout]);
     server.respondWith(JSON.stringify(jsonRSS));
+
+    spy = sinon.spy(RiseVision.Common.LoggerUtils, "logEvent");
 
     // restore the function
     paramsStub.restore();

@@ -61,7 +61,7 @@
         });
 
         test("should log an error if the layout fails to load", function() {
-          var spyCall = RiseVision.Common.LoggerUtils.logEvent.getCall(0),
+          var spyCall = RiseVision.Common.LoggerUtils.logEvent.getCall(1), // first log is configuration
             params = {
               "event": "error",
               "event_details": "layout not loaded",

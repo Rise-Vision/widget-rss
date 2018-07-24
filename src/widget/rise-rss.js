@@ -56,7 +56,7 @@ RiseVision.RSS.RiseRSS = function( data ) {
         RiseVision.RSS.showError( "Sorry, there was a problem with the RSS feed." );
       }
 
-      RiseVision.RSS.logEvent( params, true );
+      RiseVision.RSS.logEvent( params );
     } );
 
     rss.setAttribute( "url", data.url );

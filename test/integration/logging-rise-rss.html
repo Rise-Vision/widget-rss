@@ -116,26 +116,6 @@
           assert(spy.calledWith(table, params));
         });
 
-        test("should log a rise rss error when done is fired", function() {
-          rss.dispatchEvent(new CustomEvent("rise-rss-error", {
-            "detail": "Invalid RSS feed",
-            "bubbles": true
-          }));
-
-          spy = sinon.spy(RiseVision.Common.LoggerUtils, "logEvent");
-
-          clock.tick(5000);
-
-          assert(spy.calledTwice);  // rise rss error + done
-
-          spyCall = RiseVision.Common.LoggerUtils.logEvent.getCall(0);
-
-          params.error_details = "Invalid RSS feed";
-
-          assert.equal(spyCall.args[0], table);
-          assert.deepEqual(spyCall.args[1], params);
-        });
-
         test("should log a rise rss error if the feed is not an RSS feed", function(done) {
           spy = sinon.spy(RiseVision.Common.LoggerUtils, "logEvent");
 
@@ -149,29 +129,6 @@
           assert(spy.calledOnce);
           assert(spy.calledWith(table, params));
           done();
-        });
-
-        test("should not log a rise rss error when done is fired if the error has resolved itself on a refresh", function() {
-          rss.dispatchEvent(new CustomEvent("rise-rss-error", {
-            "detail": "Invalid RSS feed",
-            "bubbles": true
-          }));
-
-          console.log(jsonRSS);
-
-          // Resolve the error.
-          RiseVision.RSS.onRiseRSSRefresh({"items" : jsonRSS});
-
-          spy = sinon.spy(RiseVision.Common.LoggerUtils, "logEvent");
-
-          params.event = "done";
-          delete params.error_details;
-          delete params.event_details;
-
-          clock.tick(5000);
-
-          assert.equal(spy.callCount, 1, "called once");
-          assert(spy.calledWith(table, params));
         });
 
         test("should log a feed authentication error if the feed requires authentication", function(done) {
