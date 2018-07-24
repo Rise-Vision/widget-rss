@@ -103,7 +103,6 @@ jobs:
             - dist
 
   stage-dev:
-    working_directory: ~/Rise-Vision/widget-rss
     shell: /bin/bash --login
     environment:
       awscli: /home/ubuntu/aws/bin/aws
@@ -112,8 +111,6 @@ jobs:
       - checkout
       - attach_workspace:
           at: .
-      - restore_cache:
-          key: node-cache-{{ checksum "package.json" }}
       - restore_cache:
           key: aws-cache2
       - run: |
@@ -129,8 +126,24 @@ jobs:
           $awscli s3 ls s3://$BUCKET_NAME-test || ($awscli s3 mb s3://$BUCKET_NAME-test && $awscli s3api put-bucket-acl --bucket $BUCKET_NAME-test --grant-read 'uri="http://acs.amazonaws.com/groups/global/AllUsers"')
           $awscli s3 sync ./dist s3://$BUCKET_NAME-test/$STAGE_ENV/$(grep version package.json |grep -o '[0-9.]*')/dist --delete --grants read=uri=http://acs.amazonaws.com/groups/global/AllUsers
 
-  stage-prod:
+  build-prod:
     working_directory: ~/Rise-Vision/widget-rss
+    shell: /bin/bash --login
+    docker: *DOCKERIMAGE
+    steps:
+      - checkout
+      - attach_workspace:
+          at: .
+      - restore_cache:
+          key: node-cache-{{ checksum "package.json" }}
+      - run: nvm install 6.9.1 && nvm alias default 6.9.1
+      - run: NODE_ENV=prod npm run build
+      - persist_to_workspace:
+          root: .
+          paths:
+            - dist
+
+  stage-prod:
     shell: /bin/bash --login
     environment:
       awscli: /home/ubuntu/aws/bin/aws
@@ -140,11 +153,7 @@ jobs:
       - attach_workspace:
           at: .
       - restore_cache:
-          key: node-cache-{{ checksum "package.json" }}
-      - restore_cache:
           key: aws-cache2
-      - run: nvm install 6.9.1 && nvm alias default 6.9.1
-      - run: NODE_ENV=prod npm run build
       - run: |
           STAGE_ENV="$(git log -1 --pretty=%B | grep '\[.*\]' |sed -e 's/.*\[\(.*\)\].*/\1/g')"
           if [ "$STAGE_ENV" != '' ]
@@ -161,7 +170,6 @@ jobs:
           path: dist.tar.gz
 
   deploy-stable:
-    working_directory: ~/Rise-Vision/widget-rss
     shell: /bin/bash --login
     environment:
       awscli: /home/ubuntu/aws/bin/aws
@@ -170,8 +178,6 @@ jobs:
       - checkout
       - attach_workspace:
           at: .
-      - restore_cache:
-          key: node-cache-{{ checksum "package.json" }}
       - restore_cache:
           key: aws-cache2
       - run: echo Deploying version $(grep version package.json |grep -o '[0-9.]*') to $BUCKET_NAME
@@ -208,9 +214,16 @@ workflows:
             branches:
               only:
                 - /^(feature|fix|chore)[/].*/
-      - stage-prod:
+      - build-prod:
           requires:
             - stage-dev
+          filters:
+            branches:
+              only:
+                - /^(feature|fix|chore)[/].*/
+      - stage-prod:
+          requires:
+            - build-prod
           filters:
             branches:
               only:
