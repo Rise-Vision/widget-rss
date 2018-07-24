@@ -2,7 +2,7 @@ version: 2
 
 jobs:
   preconditions:
-    working_directory: ~/Rise-Vision/widget-rss
+    working_directory: ~/Rise-Vision/widget
     shell: /bin/bash --login
     docker: &DOCKERIMAGE
       - image: circleci/build-image:ubuntu-14.04-XXL-upstart-1189-5614f37
@@ -23,7 +23,7 @@ jobs:
           fi
 
   setup:
-    working_directory: ~/Rise-Vision/widget-rss
+    working_directory: ~/Rise-Vision/widget
     shell: /bin/bash --login
     environment:
       awscli: /home/ubuntu/aws/bin/aws
@@ -63,7 +63,7 @@ jobs:
             - /home/ubuntu/aws
 
   test:
-    working_directory: ~/Rise-Vision/widget-rss
+    working_directory: ~/Rise-Vision/widget
     shell: /bin/bash --login
     docker: *DOCKERIMAGE
     steps:
@@ -81,7 +81,7 @@ jobs:
       - run: NODE_ENV=dev npm run test
 
   build:
-    working_directory: ~/Rise-Vision/widget-rss
+    working_directory: ~/Rise-Vision/widget
     shell: /bin/bash --login
     docker: *DOCKERIMAGE
     steps:
@@ -102,7 +102,7 @@ jobs:
           paths:
             - dist
 
-  stage-dev:
+  stage-aws-dev:
     shell: /bin/bash --login
     environment:
       awscli: /home/ubuntu/aws/bin/aws
@@ -127,7 +127,7 @@ jobs:
           $awscli s3 sync ./dist s3://$BUCKET_NAME-test/$STAGE_ENV/$(grep version package.json |grep -o '[0-9.]*')/dist --delete --grants read=uri=http://acs.amazonaws.com/groups/global/AllUsers
 
   build-prod:
-    working_directory: ~/Rise-Vision/widget-rss
+    working_directory: ~/Rise-Vision/widget
     shell: /bin/bash --login
     docker: *DOCKERIMAGE
     steps:
@@ -143,7 +143,7 @@ jobs:
           paths:
             - dist
 
-  stage-prod:
+  stage-aws-prod:
     shell: /bin/bash --login
     environment:
       awscli: /home/ubuntu/aws/bin/aws
@@ -206,7 +206,7 @@ workflows:
       - build:
           requires:
             - test
-      - stage-dev:
+      - stage-aws-dev:
           requires:
             - build
             - aws-setup
@@ -216,12 +216,12 @@ workflows:
                 - /^(feature|fix|chore)[/].*/
       - build-prod:
           requires:
-            - stage-dev
+            - stage-aws-dev
           filters:
             branches:
               only:
                 - /^(feature|fix|chore)[/].*/
-      - stage-prod:
+      - stage-aws-prod:
           requires:
             - build-prod
           filters:
