@@ -225,6 +225,10 @@ workflows:
       - gcloud-setup:
           requires:
             - preconditions
+          filters:
+            branches:
+              only:
+                - master
       - test:
           requires:
             - setup
