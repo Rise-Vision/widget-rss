@@ -186,6 +186,8 @@ jobs:
       - checkout
       - attach_workspace:
           at: .
+      - run: mkdir -p ~/.config
+      - run: cp -r gcloud ~/.config
       - run: ./upload-dist.sh
 
   generate-artifacts:
