@@ -17,85 +17,95 @@
 </head>
 <body>
 
-<rise-rss id="rss" refresh="5" usage="widget"></rise-rss>
+  <rise-rss id="rss" refresh="5" usage="widget"></rise-rss>
 
-<div id="container">
-  <section class="page"></section>
-</div>
+  <div id="container">
+    <section class="page"></section>
+  </div>
 
-<canvas id="scroller">
-  Canvas is not supported.
-</canvas>
+  <canvas id="scroller">
+    Canvas is not supported.
+  </canvas>
 
-<div id="messageContainer"></div>
+  <div id="messageContainer"></div>
 
-<!-- Dummy elements to trigger custom fonts to download, if applicable. -->
-<!-- Adding these dynamically doesn't work. -->
-<div class="custom-font headline_font-style">Headline</div>
-<div class="custom-font timestamp_font-style">Timestamp</div>
-<div class="custom-font author_font-style">Author</div>
-<div class="custom-font story_font-style">Story</div>
+  <script>
+    if (document.domain.indexOf("localhost") === -1) {
+      try {
+        document.domain = "risevision.com";
+      } catch (err) {
+        // can't set document.domain, risevision.com not an accepted suffix of current document domain
+      }
+    }
+  </script>
 
-<!-- build:e2egadgets -->
-<script src="gadgets/gadgets.min.js"></script>
-<!-- endbuild -->
+  <!-- Dummy elements to trigger custom fonts to download, if applicable. -->
+  <!-- Adding these dynamically doesn't work. -->
+  <div class="custom-font headline_font-style">Headline</div>
+  <div class="custom-font timestamp_font-style">Timestamp</div>
+  <div class="custom-font author_font-style">Author</div>
+  <div class="custom-font story_font-style">Story</div>
 
-<script src="//ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
-<script>
-  if (typeof jQuery == "undefined") {
-    document.write(unescape("%3Cscript src='js/vendor/jquery/dist/jquery.min.js' type='text/javascript'%3E%3C/script%3E"));
-  }
-</script>
+  <!-- build:e2egadgets -->
+  <script src="gadgets/gadgets.min.js"></script>
+  <!-- endbuild -->
 
-<!-- Club GreenSock Members Only Plugin, subject to its own license: http://greensock.com/club/ -->
-<script src="scripts/greensock/ThrowPropsPlugin.min.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
+  <script>
+    if (typeof jQuery == "undefined") {
+      document.write(unescape("%3Cscript src='js/vendor/jquery/dist/jquery.min.js' type='text/javascript'%3E%3C/script%3E"));
+    }
+  </script>
 
-<script src="//cdnjs.cloudflare.com/ajax/libs/gsap/1.11.7/TweenLite.min.js"></script>
-<script>
-  if (typeof TweenLite == "undefined") {
-    document.write(unescape("%3Cscript src='js/vendor/gsap/src/minified/TweenLite.min.js' type='text/javascript'%3E%3C/script%3E"));
-  }
-</script>
+  <!-- Club GreenSock Members Only Plugin, subject to its own license: http://greensock.com/club/ -->
+  <script src="scripts/greensock/ThrowPropsPlugin.min.js"></script>
 
-<script src="//cdnjs.cloudflare.com/ajax/libs/gsap/1.11.7/plugins/CSSPlugin.min.js"></script>
-<script>
-  if (typeof CSSPlugin == "undefined") {
-    document.write(unescape("%3Cscript src='js/vendor/gsap/src/minified/plugins/CSSPlugin.min.js' type='text/javascript'%3E%3C/script%3E"));
-  }
-</script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/gsap/1.11.7/TweenLite.min.js"></script>
+  <script>
+    if (typeof TweenLite == "undefined") {
+      document.write(unescape("%3Cscript src='js/vendor/gsap/src/minified/TweenLite.min.js' type='text/javascript'%3E%3C/script%3E"));
+    }
+  </script>
 
-<script src="//cdnjs.cloudflare.com/ajax/libs/gsap/1.11.7/utils/Draggable.min.js"></script>
-<script>
-  if (typeof Draggable == "undefined") {
-    document.write(unescape("%3Cscript src='js/vendor/gsap/src/minified/utils/Draggable.min.js' type='text/javascript'%3E%3C/script%3E"));
-  }
-</script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/gsap/1.11.7/plugins/CSSPlugin.min.js"></script>
+  <script>
+    if (typeof CSSPlugin == "undefined") {
+      document.write(unescape("%3Cscript src='js/vendor/gsap/src/minified/plugins/CSSPlugin.min.js' type='text/javascript'%3E%3C/script%3E"));
+    }
+  </script>
 
-<script src="//cdnjs.cloudflare.com/ajax/libs/gsap/1.11.7/plugins/ScrollToPlugin.min.js"></script>
-<script>
-  if (typeof ScrollToPlugin == "undefined") {
-    document.write(unescape("%3Cscript src='js/vendor/gsap/src/minified/plugins/ScrollToPlugin.min.js' type='text/javascript'%3E%3C/script%3E"));
-  }
-</script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/gsap/1.11.7/utils/Draggable.min.js"></script>
+  <script>
+    if (typeof Draggable == "undefined") {
+      document.write(unescape("%3Cscript src='js/vendor/gsap/src/minified/utils/Draggable.min.js' type='text/javascript'%3E%3C/script%3E"));
+    }
+  </script>
 
-<!-- build:js js/widget.min.js -->
-<script src="components/jQuery.dotdotdot/src/jquery.dotdotdot.js"></script>
-<script src="components/webfontloader/webfontloader.js"></script>
-<script src="components/auto-scroll/jquery.auto-scroll.js"></script>
-<script src="components/widget-common/dist/config.js"></script>
-<script src="components/widget-common/dist/common.js"></script>
-<script src="components/widget-common/dist/scroller.js"></script>
-<script src="components/widget-common/dist/logger.js"></script>
-<script src="widget/rss.js"></script>
-<script src="widget/utils.js"></script>
-<script src="widget/images.js"></script>
-<script src="widget/rise-rss.js"></script>
-<script src="widget/transition-no-scroll.js"></script>
-<script src="widget/transition-vertical-scroll.js"></script>
-<script src="widget/horizontal-scroll.js"></script>
-<script src="widget/content.js"></script>
-<script src="components/widget-common/dist/message.js"></script>
-<script src="widget/main.js"></script>
-<!-- endbuild -->
+  <script src="//cdnjs.cloudflare.com/ajax/libs/gsap/1.11.7/plugins/ScrollToPlugin.min.js"></script>
+  <script>
+    if (typeof ScrollToPlugin == "undefined") {
+      document.write(unescape("%3Cscript src='js/vendor/gsap/src/minified/plugins/ScrollToPlugin.min.js' type='text/javascript'%3E%3C/script%3E"));
+    }
+  </script>
+
+  <!-- build:js js/widget.min.js -->
+  <script src="components/jQuery.dotdotdot/src/jquery.dotdotdot.js"></script>
+  <script src="components/webfontloader/webfontloader.js"></script>
+  <script src="components/auto-scroll/jquery.auto-scroll.js"></script>
+  <script src="components/widget-common/dist/config.js"></script>
+  <script src="components/widget-common/dist/common.js"></script>
+  <script src="components/widget-common/dist/scroller.js"></script>
+  <script src="components/widget-common/dist/logger.js"></script>
+  <script src="widget/rss.js"></script>
+  <script src="widget/utils.js"></script>
+  <script src="widget/images.js"></script>
+  <script src="widget/rise-rss.js"></script>
+  <script src="widget/transition-no-scroll.js"></script>
+  <script src="widget/transition-vertical-scroll.js"></script>
+  <script src="widget/horizontal-scroll.js"></script>
+  <script src="widget/content.js"></script>
+  <script src="components/widget-common/dist/message.js"></script>
+  <script src="widget/main.js"></script>
+  <!-- endbuild -->
 </body>
 </html>
