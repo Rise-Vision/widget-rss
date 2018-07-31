@@ -113,7 +113,7 @@
         scroller.addEventListener("done", responseHandler);
       });
 
-      test("should log an error when size of the canvas is over the max size", function (done) {
+      test("should log a warning when size of the canvas is over the max size", function (done) {
         context.clear();
 
         var spy = sinon.spy(RiseVision.RSS, "logEvent");
@@ -127,7 +127,7 @@
           assert.deepEqual(spy.args[0][0], {
             "company_id": "\"companyId\"",
             "display_id": "\"displayId\"",
-            "event": "error",
+            "event": "warning",
             "event_details": "canvas width is over the max size",
             "feed_url": "http://test.com/feed.rss"
           });
