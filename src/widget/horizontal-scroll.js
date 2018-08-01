@@ -23,7 +23,7 @@ RiseVision.RSS.HorizontalScroll = function( params, content ) {
     scrollerElem.addEventListener( "scroller-oversized-canvas", function() {
 
       RiseVision.RSS.logEvent( {
-        "event": "error",
+        "event": "warning",
         "event_details": "canvas width is over the max size",
         "feed_url": params.url
       } );
