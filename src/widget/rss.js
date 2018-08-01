@@ -44,7 +44,7 @@ RiseVision.RSS = ( function( document, gadgets ) {
 
   function _noFeedItems() {
     var params = {
-      "event": "error",
+      "event": "warning",
       "event_details": "no feed items",
       "feed_url": _additionalParams.url
     };
