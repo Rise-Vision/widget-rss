@@ -164,6 +164,23 @@
           assert(spy.calledWith(table, params));
           done();
         });
+
+        test("should log a feed request error when 403 forbidden response", function(done) {
+          spy = sinon.spy(RiseVision.Common.LoggerUtils, "logEvent");
+
+          rss.dispatchEvent(new CustomEvent("rise-rss-error", {
+            "detail": "Bad status code: 403 message: Forbidden",
+            "bubbles": true
+          }));
+
+          params.event = "error";
+          params.event_details = "feed request error";
+          params.error_details = "Bad status code: 403 message: Forbidden";
+
+          assert(spy.calledOnce);
+          assert(spy.calledWith(table, params));
+          done();
+        });
       });
 
     });

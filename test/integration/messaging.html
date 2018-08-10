@@ -125,6 +125,15 @@
 
           assert.equal(document.querySelector(".message").innerHTML, "The URL provided is not an RSS feed.");
         });
+
+        test("should show message that feed request was a problem", function() {
+          rss.dispatchEvent(new CustomEvent("rise-rss-error", {
+            "detail": "Bad status code: 403 message: Forbidden",
+            "bubbles": true
+          }));
+
+          assert.equal(document.querySelector(".message").innerHTML, "Sorry, there was a problem requesting the RSS feed, please contact the owner of the RSS feed to resolve.");
+        });
       });
 
     });
