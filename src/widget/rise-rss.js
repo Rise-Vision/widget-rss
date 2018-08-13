@@ -52,6 +52,9 @@ RiseVision.RSS.RiseRSS = function( data ) {
         RiseVision.RSS.showError( "The feed URL <span class='error-link'>" + data.url + "</span> could not be found." );
       } else if ( errorDetails.toLowerCase() === "not a feed" ) {
         RiseVision.RSS.showError( "The URL provided is not an RSS feed." );
+      } else if ( errorDetails.indexOf( "403" ) > 0 && errorDetails.toLowerCase().indexOf( "forbidden" ) > 0 ) {
+        params.event_details = "feed request error";
+        RiseVision.RSS.showError( "Sorry, there was a problem requesting the RSS feed, please contact the owner of the RSS feed to resolve." );
       } else {
         RiseVision.RSS.showError( "Sorry, there was a problem with the RSS feed." );
       }
