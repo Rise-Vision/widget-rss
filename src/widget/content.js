@@ -29,7 +29,7 @@ RiseVision.RSS.Content = function( prefs, params ) {
     }
   }
 
-  function isValidImageInEnclosure( enclosure ) {
+  function _isValidImageInEnclosure( enclosure ) {
     var contentType = enclosure.type,
       start,
       extension;
@@ -47,7 +47,7 @@ RiseVision.RSS.Content = function( prefs, params ) {
   function getImageUrl( item ) {
     var imageUrl = null;
 
-    if ( _.has( item, "enclosures" ) && item.enclosures[ 0 ] && isValidImageInEnclosure( item.enclosures[ 0 ] ) ) {
+    if ( _.has( item, "enclosures" ) && item.enclosures[ 0 ] && _isValidImageInEnclosure( item.enclosures[ 0 ] ) ) {
       imageUrl = item.enclosures[ 0 ].url;
     } else if ( item.image && item.image.url ) {
       imageUrl = item.image.url;
