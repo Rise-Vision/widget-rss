@@ -200,8 +200,11 @@
 
   gulp.task("test:unit:widget", factory.testUnitAngular(
     {testFiles: [
+      "src/components/underscore/underscore.js",
+      "src/widget/content.js",
       "src/widget/utils.js",
       "src/widget/images.js",
+      "test/unit/widget/content-spec.js",
       "test/unit/widget/utils-spec.js",
       "test/unit/widget/images-spec.js"
     ]}
