@@ -12,7 +12,8 @@ RiseVision.RSS.Content = function( prefs, params ) {
     _utils = RiseVision.RSS.Utils,
     _images = RiseVision.RSS.Images,
     _transition = null,
-    _imageTypes = [ "image/bmp", "image/gif", "image/jpeg", "image/jpg", "image/png", "image/tiff" ];
+    _imageTypes = [ "image/bmp", "image/gif", "image/jpeg", "image/jpg", "image/png", "image/tiff" ],
+    _imageExtensions = [ "bmp", "gif", "jpeg", "jpg", "png", "tiff" ];
 
   /*
    *  Private Methods
@@ -28,10 +29,25 @@ RiseVision.RSS.Content = function( prefs, params ) {
     }
   }
 
-  function _getImageUrl( item ) {
+  function _isValidImageInEnclosure( enclosure ) {
+    var contentType = enclosure.type,
+      start,
+      extension;
+
+    if ( contentType === "image" && enclosure.url ) {
+      start = enclosure.url.lastIndexOf( "." ) + 1,
+      extension = enclosure.url.substr( start );
+
+      return _.contains( _imageExtensions, extension );
+    }
+
+    return _.contains( _imageTypes, contentType );
+  }
+
+  function getImageUrl( item ) {
     var imageUrl = null;
 
-    if ( _.has( item, "enclosures" ) && item.enclosures[ 0 ] && ( _.contains( _imageTypes, item.enclosures[ 0 ].type ) ) ) {
+    if ( _.has( item, "enclosures" ) && item.enclosures[ 0 ] && _isValidImageInEnclosure( item.enclosures[ 0 ] ) ) {
       imageUrl = item.enclosures[ 0 ].url;
     } else if ( item.image && item.image.url ) {
       imageUrl = item.image.url;
@@ -45,7 +61,7 @@ RiseVision.RSS.Content = function( prefs, params ) {
       i;
 
     for ( i = 0; i < _items.length; i += 1 ) {
-      urls.push( _getImageUrl( _items[ i ] ) );
+      urls.push( getImageUrl( _items[ i ] ) );
     }
 
     return urls;
@@ -109,7 +125,7 @@ RiseVision.RSS.Content = function( prefs, params ) {
     var title = getTitle( item ),
       story = getStory( item ),
       author = getAuthor( item ),
-      imageUrl = _getImageUrl( item ),
+      imageUrl = getImageUrl( item ),
       date = getDate( item ),
       template = document.querySelector( "#layout" ).content,
       $content = $( template.cloneNode( true ) ),
@@ -365,6 +381,7 @@ RiseVision.RSS.Content = function( prefs, params ) {
     init: init,
     getAuthor: getAuthor,
     getDate: getDate,
+    getImageUrl: getImageUrl,
     getStory: getStory,
     getTitle: getTitle,
     loadImages: loadImages,
