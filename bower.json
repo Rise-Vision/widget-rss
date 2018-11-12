@@ -31,7 +31,7 @@
   "dependencies": {
     "angular": "~1.4.0",
     "angular-bootstrap": "^0.13.0",
-    "auto-scroll": "https://github.com/Rise-Vision/auto-scroll.git#1.2.0",
+    "auto-scroll": "https://github.com/Rise-Vision/auto-scroll.git#92f4c5e",
     "gsap": "~1.18.2",
     "jquery": "~2.2.0",
     "jQuery.dotdotdot": "^1.7.3",
