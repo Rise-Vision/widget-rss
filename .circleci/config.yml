@@ -30,7 +30,7 @@ jobs:
       - checkout
       - restore_cache:
           key: node-cache-{{ checksum "package.json" }}
-      - run: nvm install 8.4.0 && nvm alias default 8.4.0
+      - run: nvm install 6.9.1 && nvm alias default 6.9.1
       - run: npm install -g gulp bower
       - run: npm install
       - run: bower install
@@ -89,7 +89,7 @@ jobs:
       - run: sudo dpkg -i google-chrome-stable.deb
       # make chrome lxc-friendly
       - run: sudo sed -i 's|HERE/chrome\"|HERE/chrome\" --disable-setuid-sandbox|g' /opt/google/chrome/google-chrome
-      - run: nvm install 8.4.0 && nvm alias default 8.4.0
+      - run: nvm install 6.9.1 && nvm alias default 6.9.1
       - run: NODE_ENV=dev npm run test
 
   build:
@@ -102,7 +102,7 @@ jobs:
           at: .
       - restore_cache:
           key: node-cache-{{ checksum "package.json" }}
-      - run: nvm install 8.4.0 && nvm alias default 8.4.0
+      - run: nvm install 6.9.1 && nvm alias default 6.9.1
       - run: |
           if [ "${CIRCLE_BRANCH}" != "master" ]; then
             NODE_ENV=test npm run build
