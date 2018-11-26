@@ -71,8 +71,8 @@ RiseVision.RSS.TransitionNoScroll = function( params, content ) {
     }
   }
 
-  function _show( index ) {
-    content.showItem( index );
+  function _show( index, lastItemToShow ) {
+    content.showItem( index, lastItemToShow );
 
     if ( params.transition.type === "fade" ) {
       $( ".item" ).addClass( "fade-in" );
@@ -95,7 +95,7 @@ RiseVision.RSS.TransitionNoScroll = function( params, content ) {
 
         // show the items
         for ( i = 0; i < startConfig.itemsToShow; i += 1 ) {
-          _show( i );
+          _show( i, i === ( startConfig.itemsToShow - 1 ) );
         }
 
         _currentItemIndex = startConfig.currentItemIndex;
@@ -114,7 +114,7 @@ RiseVision.RSS.TransitionNoScroll = function( params, content ) {
       content.loadImages( function() {
         _clear( function() {
           for ( i = 0; i < startConfig.itemsToShow; i += 1 ) {
-            _show( i );
+            _show( i, i === ( startConfig.itemsToShow - 1 ) );
           }
 
           _currentItemIndex = startConfig.currentItemIndex;
@@ -128,7 +128,7 @@ RiseVision.RSS.TransitionNoScroll = function( params, content ) {
 
       _clear( function() {
         for ( i = startingIndex; i < ( startingIndex + transConfig.itemsToShow ); i += 1 ) {
-          _show( i );
+          _show( i, i === ( ( startingIndex + transConfig.itemsToShow ) - 1 ) );
         }
       } );
     }
@@ -165,7 +165,7 @@ RiseVision.RSS.TransitionNoScroll = function( params, content ) {
 
     // show the items
     for ( i = 0; i < startConfig.itemsToShow; i += 1 ) {
-      _show( i );
+      _show( i, i === ( startConfig.itemsToShow - 1 ) );
     }
 
     if ( _waitingToStart ) {
