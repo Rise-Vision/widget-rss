@@ -220,12 +220,12 @@ RiseVision.RSS.Content = function( prefs, params ) {
     } );
   }
 
-  function _showItem( index ) {
+  function _showItem( index, lastItemToShow ) {
     $( ".page" ).append( _getTemplate( _items[ index ], index ) );
 
     _setImageDimensions();
 
-    if ( params.separator && params.separator.show ) {
+    if ( params.separator && params.separator.show && !lastItemToShow ) {
       $( ".item" ).css( "border-bottom", "solid " + params.separator.size + "px " + params.separator.color );
     }
 
@@ -365,8 +365,8 @@ RiseVision.RSS.Content = function( prefs, params ) {
     _items = [];
   }
 
-  function showItem( index ) {
-    _showItem( index );
+  function showItem( index, lastItemToShow ) {
+    _showItem( index, lastItemToShow );
   }
 
   function update( feed ) {

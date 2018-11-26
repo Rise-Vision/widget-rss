@@ -49,7 +49,7 @@ RiseVision.RSS.TransitionVerticalScroll = function( params, content ) {
 
     // show all the items
     for ( i = 0; i < _items.length; i += 1 ) {
-      content.showItem( i );
+      content.showItem( i, i === ( _items.length - 1 ) );
     }
 
     $( ".item" ).removeClass( "hide" );
