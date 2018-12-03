@@ -186,6 +186,14 @@
         expect( element( by.css( "button#save[disabled=disabled" ) ).isPresent() ).to.eventually.be.true;
       } );
 
+      it( "Should not hang with invalid url", function() {
+        // This was causing a hang similar to that of widget-web-page issue 98
+        var badUrl = "dfasfadfsadfsadfasdfafsadfsafsadfadfafaddsfasdfsdasfdadsafafafsdfs";
+
+        element( by.name( "url" ) ).sendKeys( badUrl );
+        expect( element( by.css( "button#save[disabled=disabled" ) ).isPresent() ).to.eventually.be.true;
+      } );
+
       it( "Should correctly save settings", function() {
         var settings = {
           params: {},
