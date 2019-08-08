@@ -5,7 +5,8 @@ RiseVision.RSS = RiseVision.RSS || {};
 RiseVision.RSS.RiseRSS = function( data ) {
   "use strict";
 
-  var _initialLoad = true;
+  var _initialLoad = true,
+    _timedOutCount = 0;
 
   /*
    *  Public Methods
@@ -14,6 +15,8 @@ RiseVision.RSS.RiseRSS = function( data ) {
     var rss = document.querySelector( "rise-rss" );
 
     rss.addEventListener( "rise-rss-response", function( e ) {
+      _timedOutCount = 0;
+
       if ( e.detail && e.detail.feed ) {
         if ( _initialLoad ) {
           _initialLoad = false;
@@ -57,6 +60,13 @@ RiseVision.RSS.RiseRSS = function( data ) {
         RiseVision.RSS.showError( "Sorry, there was a problem requesting the RSS feed, please contact the owner of the RSS feed to resolve." );
       } else {
         RiseVision.RSS.showError( "Sorry, there was a problem with the RSS feed." );
+      }
+
+      _timedOutCount = errorDetails.toUpperCase().indexOf( "ETIMEDOUT" ) !== -1 ? _timedOutCount + 1 : 0;
+
+      if ( _timedOutCount > 0 && _timedOutCount < 3 ) {
+        // prevent logging an ETIMEDOUT error until it occurs at least 3 consecutive times
+        return;
       }
 
       RiseVision.RSS.logEvent( params );

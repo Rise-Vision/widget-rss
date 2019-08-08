@@ -181,6 +181,66 @@
           assert(spy.calledWith(table, params));
           done();
         });
+
+        test("should log a ETIMEDOUT error only after receiving 3 consecutive times", function(done) {
+          spy = sinon.spy(RiseVision.Common.LoggerUtils, "logEvent");
+
+          rss.dispatchEvent(new CustomEvent("rise-rss-error", {
+            "detail": "ETIMEDOUT",
+            "bubbles": true
+          }));
+
+          params.event = "error";
+          params.event_details = "rise rss error";
+          params.error_details = "ETIMEDOUT";
+
+          assert.isFalse(spy.calledOnce);
+
+          rss.dispatchEvent(new CustomEvent("rise-rss-error", {
+            "detail": "ETIMEDOUT",
+            "bubbles": true
+          }));
+
+          assert.isFalse(spy.calledOnce);
+
+          rss.dispatchEvent(new CustomEvent("rise-rss-error", {
+            "detail": "ETIMEDOUT",
+            "bubbles": true
+          }));
+
+          assert(spy.calledOnce);
+          assert(spy.calledWith(table, params));
+          done();
+        });
+
+        test("should reset ETIMEDOUT error count when different error is received", function(done) {
+          spy = sinon.spy(RiseVision.Common.LoggerUtils, "logEvent");
+
+          rss.dispatchEvent(new CustomEvent("rise-rss-error", {
+            "detail": "ETIMEDOUT",
+            "bubbles": true
+          }));
+
+          // count is already over 3 from previous test case
+          assert(spy.calledOnce);
+
+          rss.dispatchEvent(new CustomEvent("rise-rss-error", {
+            "detail": "Bad status code: 403 message: Forbidden",
+            "bubbles": true
+          }));
+
+          assert(spy.calledTwice);
+
+          rss.dispatchEvent(new CustomEvent("rise-rss-error", {
+            "detail": "ETIMEDOUT",
+            "bubbles": true
+          }));
+
+          // ETIMEDOUT count was reset from previous error
+          assert.isFalse(spy.calledThrice);
+
+          done();
+        });
       });
 
     });
