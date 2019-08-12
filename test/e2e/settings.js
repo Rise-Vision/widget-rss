@@ -165,7 +165,7 @@
         expect( element( by.id( "authentication" ) ).isPresent() ).to.eventually.be.false;
       } );
 
-      it( "should not show not a feed warning when URL Field is receiving input", function() {
+      xit( "should not show not a feed warning when URL Field is receiving input", function() {
         element( by.css( "#rssUrl input[name='url']" ) ).sendKeys( "http://test.com/rss" );
 
         expect( element( by.id( "not-a-feed" ) ).isPresent() ).to.eventually.be.false;
