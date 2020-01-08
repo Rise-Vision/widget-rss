@@ -23,7 +23,7 @@
     "chai-as-promised": "^4.3.0",
     "colors": "~1.0.3",
     "del": "~1.1.1",
-    "eslint": "^4.8.12",
+    "eslint": "^6.6.0",
     "eslint-config-idiomatic": "^2.1.0",
     "growl": "1.10.5",
     "gulp": "^3.9.0",
