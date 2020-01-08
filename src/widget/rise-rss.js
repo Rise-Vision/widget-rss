@@ -14,6 +14,18 @@ RiseVision.RSS.RiseRSS = function( data ) {
   function init() {
     var rss = document.querySelector( "rise-rss" );
 
+    if ( !rss.go ) {
+      setTimeout( function() {
+        init();
+      }, 100 );
+
+      return;
+    }
+
+    _initRss( rss );
+  }
+
+  function _initRss( rss ) {
     rss.addEventListener( "rise-rss-response", function( e ) {
       _timedOutCount = 0;
 
