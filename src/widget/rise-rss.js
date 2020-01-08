@@ -15,9 +15,7 @@ RiseVision.RSS.RiseRSS = function( data ) {
     var rss = document.querySelector( "rise-rss" );
 
     if ( !rss.go ) {
-      setTimeout( function() {
-        init();
-      }, 100 );
+      setTimeout( init, 100 );
 
       console.log( "rise-rss component still not initialized; retrying" ); // eslint-disable-line no-console
       return;
