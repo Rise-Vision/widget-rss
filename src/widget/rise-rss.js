@@ -19,6 +19,7 @@ RiseVision.RSS.RiseRSS = function( data ) {
         init();
       }, 100 );
 
+      console.log( "rise-rss component still not initialized; retrying" ); // eslint-disable-line no-console
       return;
     }
 
