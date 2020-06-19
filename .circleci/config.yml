@@ -227,12 +227,9 @@ workflows:
       - gcloud-setup:
           requires:
             - preconditions
-      - test:
-          requires:
-            - setup
       - build:
           requires:
-            - test
+            - setup
       - stage-aws-dev:
           requires:
             - build
