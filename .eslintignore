@@ -2,3 +2,5 @@ src/components/**
 src/config/config.js
 src/config/version.js
 src/widget/analytics.js
+src/widget/logger.js
+
