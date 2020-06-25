@@ -39,7 +39,7 @@
     "rv-angular-bootstrap-colorpicker": "https://github.com/Rise-Vision/angular-bootstrap-colorpicker.git#3.0.25",
     "rise-rss": "https://github.com/Rise-Vision/rise-rss.git#1.5.11",
     "webfontloader": "^1.6.24",
-    "widget-common": "https://github.com/Rise-Vision/widget-common.git#v3.9.1",
+    "widget-common": "https://github.com/Rise-Vision/widget-common.git#v3.11.0",
     "widget-settings-ui-components": "https://github.com/Rise-Vision/widget-settings-ui-components.git#3.5.0",
     "widget-settings-ui-core": "https://github.com/Rise-Vision/widget-settings-ui-core.git#0.4.3",
     "xmlToJSON.js": "^1.3.2",
