@@ -96,7 +96,12 @@
   });
 
   var check = function( done ) {
-    if ( ready ) {
+    if ( ready && document.querySelector("#secondary") ) {
+      var secondary = document.querySelector("#secondary");
+
+      context = secondary.getContext("2d");
+      json = JSON.parse(context.json());
+
       done();
     } else {
       setTimeout( function() {
@@ -107,11 +112,6 @@
 
   suite("Horizontal Scroll", function() {
     suiteSetup(function(done) {
-      var secondary = document.querySelector("#secondary");
-
-      context = secondary.getContext("2d");
-      json = JSON.parse(context.json());
-
       check(done);
     });
 
