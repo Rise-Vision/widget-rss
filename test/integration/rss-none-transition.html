@@ -8,7 +8,7 @@
   <link rel="stylesheet" type="text/css" href="../../src/widget/css/rss.css">
   <link rel="stylesheet" href="../../src/components/widget-common/dist/css/message.css">
 
-  <script src="../../src/components/webcomponentsjs/webcomponents-loader.js"></script>
+  <script src="../../src/components/webcomponentsjs/webcomponents-lite.js"></script>
   <script src="../../src/components/web-component-tester/browser.js"></script>
 
   <link rel="import" href="../../src/components/rise-rss/rise-rss.html">
@@ -49,96 +49,119 @@
 
 <script>
 
-  var clock, paramsStub, paramsStub2, server;
+  var clock, server, ready = false;
   var rss = document.querySelector("rise-rss");
 
-  function startTests() {
-    suite("RSS Content", function() {
+  sinon.stub(RiseVision.RSS, "setAdditionalParams", function (names, values) {
+    var isRSSReady = function() {
+      if ( !rss.go ) {
+        setTimeout( isRSSReady, 100 );
+      } else {
+        config();
+      }
+    }
 
-      suiteTeardown(function() {
-        clock.restore();
-        server.restore();
+    function config() {
+      ready = true;
+      // need to set the fake timer clock before any of the code within setAdditionalParams is executed
+      clock = sinon.useFakeTimers();
+
+      server = sinon.fakeServer.create();
+      server.respondImmediately = true;
+
+      server.respondWith("GET", "/components/widget-rss/test/integration/layouts/layout-4x1.html",
+        [200, { "Content-Type": "text/html" }, layout]);
+      server.respondWith(JSON.stringify(jsonRSS));
+
+      sinon.stub(rss.$.data, "getItem", function(key, cb) {
+        cb(null);
       });
 
-      suite("Transitioning", function() {
+      sinon.stub(rss, "go", function () {
+        // restore the function
+        rss.go.restore();
+        rss._onDataPingReceived();
+        rss._onDisplayIdReceived();
+      });
 
-        test("should always transition to next rss item after 20 seconds", function() {
-          assert.equal($(".headline a").eq(0).text(),
-            "RSS 2.0 & Entry 1 title", "first item displaying");
+      // restore the function
+      RiseVision.RSS.setAdditionalParams.restore();
+      // call it again with the params
+      RiseVision.RSS.setAdditionalParams(names, values);
+    }
 
-          clock.tick(20000);
+    isRSSReady();
+  });
 
-          assert.equal(document.querySelector(".headline a").innerHTML,
-            "RSS 2.0 - Entry 2 title", "second item displaying");
+  var check = function( done ) {
+    if ( ready ) {
+      done();
+    } else {
+      setTimeout( function() {
+        check( done )
+      }, 1000 );
+    }
+  };
 
-        });
+  suite("RSS Content", function() {
+    suiteSetup(function(done) {
+      check(done);
+    });
+
+    suiteTeardown(function() {
+      clock.restore();
+      server.restore();
+    });
+
+    suite("Transitioning", function() {
+
+      test("should always transition to next rss item after 20 seconds", function() {
+        assert.equal($(".headline a").eq(0).text(),
+          "RSS 2.0 & Entry 1 title", "first item displaying");
+
+        clock.tick(20000);
+
+        assert.equal(document.querySelector(".headline a").innerHTML,
+          "RSS 2.0 - Entry 2 title", "second item displaying");
+
+      });
 
 
-        test("should not transition to next rss item before 20 seconds", function() {
-          assert.equal(document.querySelector(".headline a").innerHTML,
-            "RSS 2.0 - Entry 2 title", "second item displaying");
+      test("should not transition to next rss item before 20 seconds", function() {
+        assert.equal(document.querySelector(".headline a").innerHTML,
+          "RSS 2.0 - Entry 2 title", "second item displaying");
 
-          clock.tick(15000);
+        clock.tick(15000);
 
-          assert.equal(document.querySelector(".headline a").innerHTML,
-            "RSS 2.0 - Entry 2 title", "second still item displaying");
+        assert.equal(document.querySelector(".headline a").innerHTML,
+          "RSS 2.0 - Entry 2 title", "second still item displaying");
 
-          clock.tick(5000);
+        clock.tick(5000);
 
-          assert.equal(document.querySelector(".headline a").innerHTML,
-            "RSS 2.0 - Entry 3 title", "Third item displaying");
+        assert.equal(document.querySelector(".headline a").innerHTML,
+          "RSS 2.0 - Entry 3 title", "Third item displaying");
 
-        });
+      });
 
-        test("should eventually transition all items and start over", function() {
-          var contentDoneSpy = sinon.spy(RiseVision.RSS, "onContentDone");
+      test("should eventually transition all items and start over", function() {
+        var contentDoneSpy = sinon.spy(RiseVision.RSS, "onContentDone");
 
-          assert.equal(document.querySelector(".headline a").innerHTML,
-            "RSS 2.0 - Entry 3 title", "Third item currently displaying");
+        assert.equal(document.querySelector(".headline a").innerHTML,
+          "RSS 2.0 - Entry 3 title", "Third item currently displaying");
 
-          // move clock enough intervals that last (4th) item has shown for allotted 10 seconds and now time to start over
-          clock.tick(40000);
+        // move clock enough intervals that last (4th) item has shown for allotted 10 seconds and now time to start over
+        clock.tick(40000);
 
-          assert(contentDoneSpy.calledOnce, "onContentDone called once");
-          assert.equal($(".headline a").eq(0).text(),
-            "RSS 2.0 & Entry 1 title", "First item displaying again");
+        assert(contentDoneSpy.calledOnce, "onContentDone called once");
+        assert.equal($(".headline a").eq(0).text(),
+          "RSS 2.0 & Entry 1 title", "First item displaying again");
 
-          RiseVision.RSS.onContentDone.restore();
-
-        });
+        RiseVision.RSS.onContentDone.restore();
 
       });
 
     });
-  }
 
-  sinon.stub(rss.$.data, "getItem", function(key, cb) {
-    cb(null);
-  });
-
-  paramsStub = sinon.stub(RiseVision.RSS, "setAdditionalParams", function (names, values) {
-    // need to set the fake timer clock before any of the code within setAdditionalParams is executed
-    clock = sinon.useFakeTimers();
-
-    server = sinon.fakeServer.create();
-    server.respondImmediately = true;
-
-    server.respondWith("GET", "/components/widget-rss/test/integration/layouts/layout-4x1.html",
-      [200, { "Content-Type": "text/html" }, layout]);
-    server.respondWith(JSON.stringify(jsonRSS));
-
-    // restore the function
-    paramsStub.restore();
-    // call it again with the params
-    RiseVision.RSS.setAdditionalParams(names, values);
-    startTests();
-  });
-
-  paramsStub2 = sinon.stub(rss, "go", function () {
-    // restore the function
-    paramsStub2.restore();
-    rss._onDataPingReceived();
-    rss._onDisplayIdReceived();
   });
 
 </script>

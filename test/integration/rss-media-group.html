@@ -8,7 +8,7 @@
   <link rel="stylesheet" type="text/css" href="../../src/widget/css/rss.css">
   <link rel="stylesheet" href="../../src/components/widget-common/dist/css/message.css">
 
-  <script src="../../src/components/webcomponentsjs/webcomponents-loader.js"></script>
+  <script src="../../src/components/webcomponentsjs/webcomponents-lite.js"></script>
   <script src="../../src/components/web-component-tester/browser.js"></script>
 
   <link rel="import" href="../../src/components/rise-rss/rise-rss.html">
@@ -49,64 +49,87 @@
 
 <script>
 
-  var clock, paramsStub, paramsStub2, server;
+  var clock, server, ready = false;
   var rss = document.querySelector("rise-rss");
 
-  function startTests() {
-    suite("New Settings", function() {
+  sinon.stub(RiseVision.RSS, "setAdditionalParams", function (names, values) {
+    var isRSSReady = function() {
+      if ( !rss.go ) {
+        setTimeout( isRSSReady, 100 );
+      } else {
+        config();
+      }
+    }
 
-      suiteTeardown(function() {
-        clock.restore();
-        server.restore();
+    function config() {
+      ready = true;
+      // need to set the fake timer clock before any of the code within setAdditionalParams is executed
+      clock = sinon.useFakeTimers();
+
+      server = sinon.fakeServer.create();
+      server.respondImmediately = true;
+
+      server.respondWith("GET", "/components/widget-rss/test/integration/layouts/layout-4x1.html",
+        [200, { "Content-Type": "text/html" }, layout]);
+      server.respondWith(JSON.stringify(jsonRSSMediaGroup));
+
+      sinon.stub(rss.$.data, "getItem", function(key, cb) {
+        cb(null);
       });
 
-      suite("Show Title", function () {
-        test("should populate headline", function() {
-          assert.equal(document.querySelector(".headline a").innerHTML, "RSS 2.0 – Entry 1 title");
-        });
+      sinon.stub(rss, "go", function () {
+        // restore the function
+        rss.go.restore();
+        rss._onDataPingReceived();
+        rss._onDisplayIdReceived();
       });
 
-      suite("Show Timestamp", function () {
-        test("should populate timestamp", function() {
-          assert.equal(document.querySelector(".timestamp").innerHTML, "June 3, 2003");
-        });
-      });
+      // restore the function
+      RiseVision.RSS.setAdditionalParams.restore();
+      // call it again with the params
+      RiseVision.RSS.setAdditionalParams(names, values);
+    }
 
-      suite("Show Author", function () {
-        test("should populate author", function() {
-          assert.equal(document.querySelector(".author").innerHTML, "Mr. X1");
-        });
+    isRSSReady();
+  });
+
+  var check = function( done ) {
+    if ( ready ) {
+      done();
+    } else {
+      setTimeout( function() {
+        check( done )
+      }, 1000 );
+    }
+  };
+
+  suite("New Settings", function() {
+    suiteSetup(function(done) {
+      check(done);
+    });
+
+    suiteTeardown(function() {
+      clock.restore();
+      server.restore();
+    });
+
+    suite("Show Title", function () {
+      test("should populate headline", function() {
+        assert.equal(document.querySelector(".headline a").innerHTML, "RSS 2.0 – Entry 1 title");
       });
     });
-  }
 
-  sinon.stub(rss.$.data, "getItem", function(key, cb) {
-    cb(null);
-  });
+    suite("Show Timestamp", function () {
+      test("should populate timestamp", function() {
+        assert.equal(document.querySelector(".timestamp").innerHTML, "June 3, 2003");
+      });
+    });
 
-  paramsStub = sinon.stub(RiseVision.RSS, "setAdditionalParams", function (names, values) {
-    // need to set the fake timer clock before any of the code within setAdditionalParams is executed
-    clock = sinon.useFakeTimers();
-
-    server = sinon.fakeServer.create();
-    server.respondImmediately = true;
-
-    server.respondWith("GET", "/components/widget-rss/test/integration/layouts/layout-4x1.html",
-      [200, { "Content-Type": "text/html" }, layout]);
-    server.respondWith(JSON.stringify(jsonRSSMediaGroup));
-
-    // restore the function
-    paramsStub.restore();
-    // call it again with the params
-    RiseVision.RSS.setAdditionalParams(names, values);
-    startTests();
-  });
-
-  paramsStub2 = sinon.stub(rss, "go", function () {
-    // restore the function
-    paramsStub2.restore();
-    rss._onDataPingReceived();
-    rss._onDisplayIdReceived();
+    suite("Show Author", function () {
+      test("should populate author", function() {
+        assert.equal(document.querySelector(".author").innerHTML, "Mr. X1");
+      });
+    });
   });
 
 </script>

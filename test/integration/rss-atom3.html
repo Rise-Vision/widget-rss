@@ -8,7 +8,7 @@
   <link rel="stylesheet" type="text/css" href="../../src/widget/css/rss.css">
   <link rel="stylesheet" href="../../src/components/widget-common/dist/css/message.css">
 
-  <script src="../../src/components/webcomponentsjs/webcomponents-loader.js"></script>
+  <script src="../../src/components/webcomponentsjs/webcomponents-lite.js"></script>
   <script src="../../src/components/web-component-tester/browser.js"></script>
 
   <link rel="import" href="../../src/components/rise-rss/rise-rss.html">
@@ -49,113 +49,138 @@
 
 <script>
 
-  var clock, paramsStub, paramsStub2, server;
+  var clock, server, ready = false;
   var rss = document.querySelector("rise-rss");
 
-  function startTests() {
-    suite("RSS Content", function() {
+  sinon.stub(RiseVision.RSS, "setAdditionalParams", function (names, values) {
+    var isRSSReady = function() {
+      if ( !rss.go ) {
+        setTimeout( isRSSReady, 100 );
+      } else {
+        config();
+      }
+    }
 
-      suiteTeardown(function() {
-        clock.restore();
-        server.restore();
+    function config() {
+      ready = true;
+      // need to set the fake timer clock before any of the code within setAdditionalParams is executed
+      clock = sinon.useFakeTimers();
+
+      server = sinon.fakeServer.create();
+      server.respondImmediately = true;
+
+      server.respondWith("GET", "/components/widget-rss/test/integration/layouts/layout-4x1.html",
+        [200, { "Content-Type": "text/html" }, layout]);
+      server.respondWith(JSON.stringify(jsonAtom3));
+
+      sinon.stub(rss.$.data, "getItem", function(key, cb) {
+        cb(null);
       });
 
-      suite("Initialization", function () {
-        test("should set the width of the container", function() {
-          assert.equal(document.getElementById("container").style.width, window.innerWidth + "px");
-        });
-
-        test("should set the height of the container", function() {
-          assert.equal(document.getElementById("container").style.height, window.innerHeight + "px");
-        });
+      sinon.stub(rss, "go", function () {
+        // restore the function
+        rss.go.restore();
+        rss._onDataPingReceived();
+        rss._onDisplayIdReceived();
       });
 
-      suite("RSS Item", function () {
-        test("should append template item", function() {
-          assert.isNotNull(document.querySelector(".item"));
-        });
+      // restore the function
+      RiseVision.RSS.setAdditionalParams.restore();
+      // call it again with the params
+      RiseVision.RSS.setAdditionalParams(names, values);
+    }
 
-        test("should set item height divided by number of items to show", function() {
-          assert.equal((($("#container").height()/window.gadget.settings.additionalParams.itemsToShow) - window.gadget.settings.additionalParams.separator.size) + "px" , document.querySelector(".item").style.height);
-        });
+    isRSSReady();
 
-        test("should apply font styling to headline", function() {
-          assert.isNotNull(document.querySelector(".headline_font-style"));
-        });
+  });
 
-        test("should apply alignment to headline", function() {
-          assert.equal(document.querySelector(".headline").style.textAlign, "left");
-        });
+  var check = function( done ) {
+    if ( ready ) {
+      done();
+    } else {
+      setTimeout( function() {
+        check( done )
+      }, 1000 );
+    }
+  };
 
-        test("should populate headline correctly", function() {
-          assert.equal(document.querySelector(".headline a").innerHTML,
-            "New Wordpress Blog");
-        });
+  suite("RSS Content", function() {
 
-        test("should populate timestamp", function() {
-          assert.equal(document.querySelector(".timestamp").innerHTML, "November 4, 2005");
-        });
+    suiteSetup(function(done) {
+      check(done);
+    });
 
-        test("should apply font styling to story", function() {
-          assert.isNotNull(document.querySelector(".story_font-style"));
-        });
+    suiteTeardown(function() {
+      clock.restore();
+      server.restore();
+    });
 
-        test("should apply alignment to story", function() {
-          assert.equal(document.querySelector(".story").style.textAlign, "left");
-        });
-
-        test("should populate story correctly", function() {
-          assert.equal(document.querySelector(".story").innerHTML,
-            "I\'ve switched blogging systems and am now blogging via my new Wordpress installation which has its own RSS feed: http:// ...");
-        });
+    suite("Initialization", function () {
+      test("should set the width of the container", function() {
+        assert.equal(document.getElementById("container").style.width, window.innerWidth + "px");
       });
 
-      suite("Items Showing", function () {
-
-        test("should append amount of items based on number of items to show", function() {
-          assert.equal(document.querySelectorAll(".item").length, window.gadget.settings.additionalParams.itemsToShow);
-        });
-
-        test("should show first and second items", function() {
-          var headlines = document.querySelectorAll(".headline a");
-
-          assert.equal(headlines[0].innerHTML,
-            "New Wordpress Blog", "first item displaying");
-
-          assert.equal(headlines[1].innerHTML,
-            "Padding Content Boxes with CSS", "second item displaying");
-        });
+      test("should set the height of the container", function() {
+        assert.equal(document.getElementById("container").style.height, window.innerHeight + "px");
       });
     });
-  }
 
-  sinon.stub(rss.$.data, "getItem", function(key, cb) {
-    cb(null);
-  });
+    suite("RSS Item", function () {
+      test("should append template item", function() {
+        assert.isNotNull(document.querySelector(".item"));
+      });
 
-  paramsStub = sinon.stub(RiseVision.RSS, "setAdditionalParams", function (names, values) {
-    // need to set the fake timer clock before any of the code within setAdditionalParams is executed
-    clock = sinon.useFakeTimers();
+      test("should set item height divided by number of items to show", function() {
+        assert.equal((($("#container").height()/window.gadget.settings.additionalParams.itemsToShow) - window.gadget.settings.additionalParams.separator.size) + "px" , document.querySelector(".item").style.height);
+      });
 
-    server = sinon.fakeServer.create();
-    server.respondImmediately = true;
+      test("should apply font styling to headline", function() {
+        assert.isNotNull(document.querySelector(".headline_font-style"));
+      });
 
-    server.respondWith("GET", "/components/widget-rss/test/integration/layouts/layout-4x1.html",
-      [200, { "Content-Type": "text/html" }, layout]);
-    server.respondWith(JSON.stringify(jsonAtom3));
+      test("should apply alignment to headline", function() {
+        assert.equal(document.querySelector(".headline").style.textAlign, "left");
+      });
 
-    // restore the function
-    paramsStub.restore();
-    // call it again with the params
-    RiseVision.RSS.setAdditionalParams(names, values);
-    startTests();
-  });
+      test("should populate headline correctly", function() {
+        assert.equal(document.querySelector(".headline a").innerHTML,
+          "New Wordpress Blog");
+      });
 
-  paramsStub2 = sinon.stub(rss, "go", function () {
-    // restore the function
-    paramsStub2.restore();
-    rss._onDataPingReceived();
-    rss._onDisplayIdReceived();
+      test("should populate timestamp", function() {
+        assert.equal(document.querySelector(".timestamp").innerHTML, "November 4, 2005");
+      });
+
+      test("should apply font styling to story", function() {
+        assert.isNotNull(document.querySelector(".story_font-style"));
+      });
+
+      test("should apply alignment to story", function() {
+        assert.equal(document.querySelector(".story").style.textAlign, "left");
+      });
+
+      test("should populate story correctly", function() {
+        assert.equal(document.querySelector(".story").innerHTML,
+          "I\'ve switched blogging systems and am now blogging via my new Wordpress installation which has its own RSS feed: http:// ...");
+      });
+    });
+
+    suite("Items Showing", function () {
+
+      test("should append amount of items based on number of items to show", function() {
+        assert.equal(document.querySelectorAll(".item").length, window.gadget.settings.additionalParams.itemsToShow);
+      });
+
+      test("should show first and second items", function() {
+        var headlines = document.querySelectorAll(".headline a");
+
+        assert.equal(headlines[0].innerHTML,
+          "New Wordpress Blog", "first item displaying");
+
+        assert.equal(headlines[1].innerHTML,
+          "Padding Content Boxes with CSS", "second item displaying");
+      });
+    });
   });
 
 </script>

@@ -8,7 +8,7 @@
   <link rel="stylesheet" type="text/css" href="../../src/widget/css/rss.css">
   <link rel="stylesheet" href="../../src/components/widget-common/dist/css/message.css">
 
-  <script src="../../src/components/webcomponentsjs/webcomponents-loader.js"></script>
+  <script src="../../src/components/webcomponentsjs/webcomponents-lite.js"></script>
   <script src="../../src/components/web-component-tester/browser.js"></script>
 
   <link rel="import" href="../../src/components/rise-rss/rise-rss.html">
@@ -47,19 +47,32 @@
 
 <script>
 
-  var rss = document.querySelector("rise-rss"), paramsStub2;
-  sinon.stub(rss.$.data, "getItem", function(key, cb) {
-    cb(null);
-  });
+  var rss = document.querySelector("rise-rss");
 
-  paramsStub2 = sinon.stub(rss, "go", function () {
-    // restore the function
-    paramsStub2.restore();
-    rss._onDataPingReceived();
-    rss._onDisplayIdReceived();
-  });
+  var isRSSReady = function(done) {
+    if ( !rss.go ) {
+      setTimeout( isRSSReady, 100 );
+    } else {
+      sinon.stub(rss.$.data, "getItem", function(key, cb) {
+        cb(null);
+      });
+
+      sinon.stub(rss, "go", function () {
+        // restore the function
+        rss.go.restore();
+        rss._onDataPingReceived();
+        rss._onDisplayIdReceived();
+      });
+
+      done();
+    }
+  }
 
   suite("Data Selection", function() {
+    suiteSetup(function(done) {
+      isRSSReady(done);
+    });
+
     suite("Show Title", function () {
       test("should remove the headline from the DOM", function() {
         assert.isNull(document.querySelector(".headline"));

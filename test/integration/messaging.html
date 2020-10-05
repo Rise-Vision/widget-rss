@@ -8,7 +8,7 @@
   <link rel="stylesheet" type="text/css" href="../../src/widget/css/rss.css">
   <link rel="stylesheet" href="../../src/components/widget-common/dist/css/message.css">
 
-  <script src="../../src/components/webcomponentsjs/webcomponents-loader.js"></script>
+  <script src="../../src/components/webcomponentsjs/webcomponents-lite.js"></script>
   <script src="../../src/components/web-component-tester/browser.js"></script>
 
   <link rel="import" href="../../src/components/rise-rss/rise-rss.html">
@@ -49,125 +49,148 @@
 
 <script>
 
-  var clock, paramsStub, paramsStub2, server;
+  var clock, server, ready = false;
   var rss = document.querySelector("rise-rss");
 
-  function startTests() {
-    suite("Messaging", function(){
-      var originalFeed = null;
+  sinon.stub(RiseVision.RSS, "setAdditionalParams", function (names, values) {
+    var isRSSReady = function() {
+      if ( !rss.go ) {
+        setTimeout( isRSSReady, 100 );
+      } else {
+        config();
+      }
+    }
 
-      sinon.stub(RiseVision.RSS, "onRiseRSSInit", function(feed){
-        originalFeed = JSON.parse(JSON.stringify(feed));
+    function config() {
+      ready = true;
+      // need to set the fake timer clock before any of the code within setAdditionalParams is executed
+      clock = sinon.useFakeTimers();
+
+      server = sinon.fakeServer.create();
+      server.respondImmediately = true;
+
+      server.respondWith("GET", "/components/widget-rss/test/integration/layouts/layout-4x1.html",
+        [200, { "Content-Type": "text/html" }, layout]);
+      server.respondWith(JSON.stringify(jsonRSS));
+
+      sinon.stub(rss.$.data, "getItem", function(key, cb) {
+        cb(null);
       });
 
-      suiteTeardown(function() {
-        clock.restore();
-        server.restore();
+      sinon.stub(rss, "go", function () {
+        // restore the function
+        rss.go.restore();
+        rss._onDataPingReceived();
+        rss._onDisplayIdReceived();
+        // call it again with the params
       });
 
-      suite("waiting", function() {
-        suiteTeardown(function(){
-          RiseVision.RSS.onRiseRSSInit.restore();
-          RiseVision.RSS.onRiseRSSInit(originalFeed);
-        });
+      // restore the function
+      RiseVision.RSS.setAdditionalParams.restore();
+      // call it again with the params
+      RiseVision.RSS.setAdditionalParams(names, values);
+    }
 
-        test("should show waiting message", function() {
-          assert.equal(document.querySelector(".message").innerHTML, "Please wait while your feed is loaded.", "message is correct");
-        });
-      });
+    isRSSReady();
+  });
 
-      suite("no feed items", function() {
-        test("should show no items message on initialization", function() {
-          RiseVision.RSS.onRiseRSSInit({ type: "rss 2.0", title: "Fake RSS Feed" });
+  var check = function( done ) {
+    if ( ready ) {
+      done();
+    } else {
+      setTimeout( function() {
+        check( done )
+      }, 1000 );
+    }
+  };
 
-          assert.equal(document.querySelector(".message").innerHTML, "There are no items to show from this RSS feed.");
-        });
+  suite("Messaging", function(){
+    var originalFeed = null;
 
-        test("should show no items message on refresh", function() {
-
-          rss.dispatchEvent(new CustomEvent("rise-rss-response", {
-            "detail": {
-              feed: []
-            },
-            "bubbles": true
-          }));
-
-          assert.equal(document.querySelector(".message").innerHTML, "There are no items to show from this RSS feed.", "message is correct");
-        });
-      });
-
-      suite("rise-rss-error", function() {
-        test("should show rise-rss error message", function() {
-
-          rss.dispatchEvent(new CustomEvent("rise-rss-error", {
-            "detail": null,
-            "bubbles": true
-          }));
-
-          assert.equal(document.querySelector(".message").innerHTML, "Sorry, there was a problem with the RSS feed.", "message is correct");
-        });
-
-        test("should show message that feed requires authentication", function() {
-          rss.dispatchEvent(new CustomEvent("rise-rss-error", {
-            "detail": "401 Unauthorized",
-            "bubbles": true
-          }));
-
-          assert.equal(document.querySelector(".message").innerHTML,
-            "The feed at the URL provided cannot be shown because it is protected and requires authentication.");
-        });
-
-        test("should show message that feed is not an RSS feed", function() {
-          rss.dispatchEvent(new CustomEvent("rise-rss-error", {
-            "detail": "Not a feed",
-            "bubbles": true
-          }));
-
-          assert.equal(document.querySelector(".message").innerHTML, "The URL provided is not an RSS feed.");
-        });
-
-        test("should show message that feed request was a problem", function() {
-          rss.dispatchEvent(new CustomEvent("rise-rss-error", {
-            "detail": "Bad status code: 403 message: Forbidden",
-            "bubbles": true
-          }));
-
-          assert.equal(document.querySelector(".message").innerHTML, "Sorry, there was a problem requesting the RSS feed, please contact the owner of the RSS feed to resolve.");
-        });
-      });
-
+    sinon.stub(RiseVision.RSS, "onRiseRSSInit", function(feed){
+      originalFeed = JSON.parse(JSON.stringify(feed));
     });
-  }
 
-  sinon.stub(rss.$.data, "getItem", function(key, cb) {
-    cb(null);
-  });
+    suiteSetup(function(done) {
+      check(done);
+    });
 
-  paramsStub = sinon.stub(RiseVision.RSS, "setAdditionalParams", function (names, values) {
-    // need to set the fake timer clock before any of the code within setAdditionalParams is executed
-    clock = sinon.useFakeTimers();
+    suiteTeardown(function() {
+      clock.restore();
+      server.restore();
+    });
 
-    server = sinon.fakeServer.create();
-    server.respondImmediately = true;
+    suite("waiting", function() {
+      suiteTeardown(function(){
+        RiseVision.RSS.onRiseRSSInit.restore();
+        RiseVision.RSS.onRiseRSSInit(originalFeed);
+      });
 
-    server.respondWith("GET", "/components/widget-rss/test/integration/layouts/layout-4x1.html",
-      [200, { "Content-Type": "text/html" }, layout]);
-    server.respondWith(JSON.stringify(jsonRSS));
+      test("should show waiting message", function() {
+        assert.equal(document.querySelector(".message").innerHTML, "Please wait while your feed is loaded.", "message is correct");
+      });
+    });
 
+    suite("no feed items", function() {
+      test("should show no items message on initialization", function() {
+        RiseVision.RSS.onRiseRSSInit({ type: "rss 2.0", title: "Fake RSS Feed" });
 
-    // restore the function
-    paramsStub.restore();
-    // call it again with the params
-    RiseVision.RSS.setAdditionalParams(names, values);
-    startTests();
-  });
+        assert.equal(document.querySelector(".message").innerHTML, "There are no items to show from this RSS feed.");
+      });
 
-  paramsStub2 = sinon.stub(rss, "go", function () {
-    // restore the function
-    paramsStub2.restore();
-    rss._onDataPingReceived();
-    rss._onDisplayIdReceived();
-    // call it again with the params
+      test("should show no items message on refresh", function() {
+
+        rss.dispatchEvent(new CustomEvent("rise-rss-response", {
+          "detail": {
+            feed: []
+          },
+          "bubbles": true
+        }));
+
+        assert.equal(document.querySelector(".message").innerHTML, "There are no items to show from this RSS feed.", "message is correct");
+      });
+    });
+
+    suite("rise-rss-error", function() {
+      test("should show rise-rss error message", function() {
+
+        rss.dispatchEvent(new CustomEvent("rise-rss-error", {
+          "detail": null,
+          "bubbles": true
+        }));
+
+        assert.equal(document.querySelector(".message").innerHTML, "Sorry, there was a problem with the RSS feed.", "message is correct");
+      });
+
+      test("should show message that feed requires authentication", function() {
+        rss.dispatchEvent(new CustomEvent("rise-rss-error", {
+          "detail": "401 Unauthorized",
+          "bubbles": true
+        }));
+
+        assert.equal(document.querySelector(".message").innerHTML,
+          "The feed at the URL provided cannot be shown because it is protected and requires authentication.");
+      });
+
+      test("should show message that feed is not an RSS feed", function() {
+        rss.dispatchEvent(new CustomEvent("rise-rss-error", {
+          "detail": "Not a feed",
+          "bubbles": true
+        }));
+
+        assert.equal(document.querySelector(".message").innerHTML, "The URL provided is not an RSS feed.");
+      });
+
+      test("should show message that feed request was a problem", function() {
+        rss.dispatchEvent(new CustomEvent("rise-rss-error", {
+          "detail": "Bad status code: 403 message: Forbidden",
+          "bubbles": true
+        }));
+
+        assert.equal(document.querySelector(".message").innerHTML, "Sorry, there was a problem requesting the RSS feed, please contact the owner of the RSS feed to resolve.");
+      });
+    });
+
   });
 
 </script>

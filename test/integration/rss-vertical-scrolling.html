@@ -8,7 +8,7 @@
   <link rel="stylesheet" type="text/css" href="../../src/widget/css/rss.css">
   <link rel="stylesheet" href="../../src/components/widget-common/dist/css/message.css">
 
-  <script src="../../src/components/webcomponentsjs/webcomponents-loader.js"></script>
+  <script src="../../src/components/webcomponentsjs/webcomponents-lite.js"></script>
   <script src="../../src/components/web-component-tester/browser.js"></script>
 
   <link rel="import" href="../../src/components/rise-rss/rise-rss.html">
@@ -57,88 +57,111 @@
 
 <script>
 
-  var clock, paramsStub, paramsStub2, server,
+  var clock, server, ready = false,
     additionalParams = window.gadget.settings.additionalParams;
   var rss = document.querySelector("rise-rss");
 
-  function startTests() {
-    suite("RSS Content", function() {
+  sinon.stub(RiseVision.RSS, "setAdditionalParams", function (names, values) {
+    var isRSSReady = function() {
+      if ( !rss.go ) {
+        setTimeout( isRSSReady, 100 );
+      } else {
+        config();
+      }
+    }
 
-      suiteTeardown(function() {
-        clock.restore();
-        server.restore();
+    function config() {
+      ready = true;
+      // need to set the fake timer clock before any of the code within setAdditionalParams is executed
+      clock = sinon.useFakeTimers();
+
+      server = sinon.fakeServer.create();
+      server.respondImmediately = true;
+
+      server.respondWith("GET", "/components/widget-rss/test/integration/layouts/layout-4x1.html",
+        [200, { "Content-Type": "text/html" }, layout]);
+      server.respondWith(JSON.stringify(jsonRSS));
+
+      sinon.stub(rss.$.data, "getItem", function(key, cb) {
+        cb(null);
       });
 
-      suite("Items showing", function () {
-
-        test("should append all items to page", function() {
-          assert.equal(document.querySelectorAll(".item").length, jsonRSS.length);
-        });
-
+      sinon.stub(rss, "go", function () {
+        // restore the function
+        rss.go.restore();
+        rss._onDataPingReceived();
+        rss._onDisplayIdReceived();
       });
 
-      suite("auto-scroll instantiation", function () {
+      // restore the function
+      RiseVision.RSS.setAdditionalParams.restore();
+      // call it again with the params
+      RiseVision.RSS.setAdditionalParams(names, values);
+    }
 
-        test("should revise HTML markup for auto-scroll purposes", function () {
-          assert.isNotNull(document.querySelector("#container div section.page"));
-        });
+    isRSSReady();
+  });
 
-        test("should apply auto-scroll specific css", function () {
-          assert.equal(document.querySelector("#container").style.overflow, "hidden");
-          assert.equal(document.querySelector("#container").style.cursor, "move");
-        });
+  var check = function( done ) {
+    if ( ready ) {
+      done();
+    } else {
+      setTimeout( function() {
+        check( done )
+      }, 1000 );
+    }
+  };
 
-        test("should set by option", function () {
-          assert.equal($("#container").data("plugin_autoScroll").options.by, "continuous");
-        });
+  suite("RSS Content", function() {
+    suiteSetup(function(done) {
+      check(done);
+    });
 
-        test("should set speed option", function () {
-          assert.equal($("#container").data("plugin_autoScroll").options.speed,
-            additionalParams.transition.speed);
-        });
+    suiteTeardown(function() {
+      clock.restore();
+      server.restore();
+    });
 
-        test("should set duration option", function () {
-          assert.equal($("#container").data("plugin_autoScroll").options.duration,
-            additionalParams.transition.duration);
-        });
+    suite("Items showing", function () {
 
-        test("should set pause option", function () {
-          assert.equal($("#container").data("plugin_autoScroll").options.pause,
-            additionalParams.transition.resume);
-        });
-
+      test("should append all items to page", function() {
+        assert.equal(document.querySelectorAll(".item").length, jsonRSS.length);
       });
 
     });
-  }
 
-  sinon.stub(rss.$.data, "getItem", function(key, cb) {
-    cb(null);
-  });
+    suite("auto-scroll instantiation", function () {
 
-  paramsStub = sinon.stub(RiseVision.RSS, "setAdditionalParams", function (names, values) {
-    // need to set the fake timer clock before any of the code within setAdditionalParams is executed
-    clock = sinon.useFakeTimers();
+      test("should revise HTML markup for auto-scroll purposes", function () {
+        assert.isNotNull(document.querySelector("#container div section.page"));
+      });
 
-    server = sinon.fakeServer.create();
-    server.respondImmediately = true;
+      test("should apply auto-scroll specific css", function () {
+        assert.equal(document.querySelector("#container").style.overflow, "hidden");
+        assert.equal(document.querySelector("#container").style.cursor, "move");
+      });
 
-    server.respondWith("GET", "/components/widget-rss/test/integration/layouts/layout-4x1.html",
-      [200, { "Content-Type": "text/html" }, layout]);
-    server.respondWith(JSON.stringify(jsonRSS));
+      test("should set by option", function () {
+        assert.equal($("#container").data("plugin_autoScroll").options.by, "continuous");
+      });
 
-    // restore the function
-    paramsStub.restore();
-    // call it again with the params
-    RiseVision.RSS.setAdditionalParams(names, values);
-    startTests();
-  });
+      test("should set speed option", function () {
+        assert.equal($("#container").data("plugin_autoScroll").options.speed,
+          additionalParams.transition.speed);
+      });
 
-  paramsStub2 = sinon.stub(rss, "go", function () {
-    // restore the function
-    paramsStub2.restore();
-    rss._onDataPingReceived();
-    rss._onDisplayIdReceived();
+      test("should set duration option", function () {
+        assert.equal($("#container").data("plugin_autoScroll").options.duration,
+          additionalParams.transition.duration);
+      });
+
+      test("should set pause option", function () {
+        assert.equal($("#container").data("plugin_autoScroll").options.pause,
+          additionalParams.transition.resume);
+      });
+
+    });
+
   });
 
 </script>
