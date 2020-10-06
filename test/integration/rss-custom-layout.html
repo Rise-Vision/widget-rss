@@ -8,7 +8,7 @@
   <link rel="stylesheet" type="text/css" href="../../src/widget/css/rss.css">
   <link rel="stylesheet" href="../../src/components/widget-common/dist/css/message.css">
 
-  <script src="../../src/components/webcomponentsjs/webcomponents-loader.js"></script>
+  <script src="../../src/components/webcomponentsjs/webcomponents-lite.js"></script>
   <script src="../../src/components/web-component-tester/browser.js"></script>
 
   <link rel="import" href="../../src/components/rise-rss/rise-rss.html">
@@ -47,36 +47,61 @@
   <script src="../../src/components/widget-common/dist/message.js"></script>
 
   <script>
-    var paramsStub, paramsStub2, server
+    var server, ready = false;
     var rss = document.querySelector("rise-rss");
 
-    function startTests() {
-      suite("Custom Layout", function() {
-        test("should load a custom layout", function() {
-          assert.isNotNull(document.querySelector("#container template#layout"));
+    sinon.stub(RiseVision.RSS, "setAdditionalParams", function(additionalParams) {
+      var isRSSReady = function() {
+        if ( !rss.go ) {
+          setTimeout( isRSSReady, 100 );
+        } else {
+          config();
+        }
+      }
+
+      function config() {
+        ready = true;
+
+        server = sinon.fakeServer.create();
+        server.respondImmediately = true;
+        server.respondWith(layout);
+
+        sinon.stub(rss.$.data, "getItem", function(key, cb) {
+          cb(null);
         });
+
+        sinon.stub(rss, "go", function () {
+          // restore the function
+          rss.go.restore();
+          rss._onDataPingReceived();
+          rss._onDisplayIdReceived();
+        });
+
+        RiseVision.RSS.setAdditionalParams.restore();
+        RiseVision.RSS.setAdditionalParams(additionalParams);
+      }
+
+      isRSSReady();
+    });
+
+    var check = function( done ) {
+      if ( ready ) {
+        done();
+      } else {
+        setTimeout( function() {
+          check( done )
+        }, 1000 );
+      }
+    };
+
+    suite("Custom Layout", function() {
+      suiteSetup(function(done) {
+        check(done);
       });
-    }
 
-    sinon.stub(rss.$.data, "getItem", function(key, cb) {
-      cb(null);
-    });
-
-    paramsStub = sinon.stub(RiseVision.RSS, "setAdditionalParams", function(additionalParams) {
-      server = sinon.fakeServer.create();
-      server.respondImmediately = true;
-      server.respondWith(layout);
-
-      paramsStub.restore();
-      RiseVision.RSS.setAdditionalParams(additionalParams);
-      startTests();
-    });
-
-    paramsStub2 = sinon.stub(rss, "go", function () {
-      // restore the function
-      paramsStub2.restore();
-      rss._onDataPingReceived();
-      rss._onDisplayIdReceived();
+      test("should load a custom layout", function() {
+        assert.isNotNull(document.querySelector("#container template#layout"));
+      });
     });
 
   </script>

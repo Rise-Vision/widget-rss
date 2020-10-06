@@ -8,7 +8,7 @@
   <link rel="stylesheet" type="text/css" href="../../src/widget/css/rss.css">
   <link rel="stylesheet" href="../../src/components/widget-common/dist/css/message.css">
 
-  <script src="../../src/components/webcomponentsjs/webcomponents-loader.js"></script>
+  <script src="../../src/components/webcomponentsjs/webcomponents-lite.js"></script>
   <script src="../../src/components/web-component-tester/browser.js"></script>
 
   <link rel="import" href="../../src/components/rise-rss/rise-rss.html">
@@ -57,57 +57,80 @@
 
 <script>
 
-  var clock, paramsStub, paramsStub2, server;
+  var clock, server, ready = false;
   var rss = document.querySelector("rise-rss");
 
-  function startTests() {
-    suite("RSS Content", function() {
+  sinon.stub(RiseVision.RSS, "setAdditionalParams", function (names, values) {
+    var isRSSReady = function() {
+      if ( !rss.go ) {
+        setTimeout( isRSSReady, 100 );
+      } else {
+        config();
+      }
+    }
 
-      suiteTeardown(function() {
-        clock.restore();
-        server.restore();
+    function config() {
+      ready = true;
+      clock = sinon.useFakeTimers();
+
+      server = sinon.fakeServer.create();
+      server.respondImmediately = true;
+
+      server.respondWith("GET", "/components/widget-rss/test/integration/layouts/layout-4x1.html",
+        [200, { "Content-Type": "text/html" }, layout]);
+      server.respondWith(JSON.stringify(jsonRSS));
+
+      sinon.stub(rss.$.data, "getItem", function(key, cb) {
+        cb(null);
       });
 
-      suite("PUD timer", function () {
-
-        test("should send Done based on PUD value", function() {
-          var contentDoneSpy = sinon.spy(RiseVision.RSS, "onContentDone");
-
-          clock.tick(10000);
-
-          assert(contentDoneSpy.calledOnce);
-
-          RiseVision.RSS.onContentDone.restore();
-        });
-
+      sinon.stub(rss, "go", function () {
+        // restore the function
+        rss.go.restore();
+        rss._onDataPingReceived();
+        rss._onDisplayIdReceived();
       });
+
+      RiseVision.RSS.setAdditionalParams.restore();
+      RiseVision.RSS.setAdditionalParams(names, values);
+    }
+
+    isRSSReady();
+  });
+
+  var check = function( done ) {
+    if ( ready ) {
+      done();
+    } else {
+      setTimeout( function() {
+        check( done )
+      }, 1000 );
+    }
+  };
+
+  suite("RSS Content", function() {
+    suiteSetup(function(done) {
+      check(done);
     });
-  }
 
-  sinon.stub(rss.$.data, "getItem", function(key, cb) {
-    cb(null);
-  });
+    suiteTeardown(function() {
+      clock.restore();
+      server.restore();
+    });
 
-  paramsStub = sinon.stub(RiseVision.RSS, "setAdditionalParams", function (names, values) {
-    clock = sinon.useFakeTimers();
+    suite("PUD timer", function () {
 
-    server = sinon.fakeServer.create();
-    server.respondImmediately = true;
+      test("should send Done based on PUD value", function() {
+        var contentDoneSpy = sinon.spy(RiseVision.RSS, "onContentDone");
 
-    server.respondWith("GET", "/components/widget-rss/test/integration/layouts/layout-4x1.html",
-      [200, { "Content-Type": "text/html" }, layout]);
-    server.respondWith(JSON.stringify(jsonRSS));
+        clock.tick(10000);
 
-    paramsStub.restore();
-    RiseVision.RSS.setAdditionalParams(names, values);
-    startTests();
-  });
+        assert(contentDoneSpy.calledOnce);
 
-  paramsStub2 = sinon.stub(rss, "go", function () {
-    // restore the function
-    paramsStub2.restore();
-    rss._onDataPingReceived();
-    rss._onDisplayIdReceived();
+        RiseVision.RSS.onContentDone.restore();
+      });
+
+    });
   });
 
 </script>

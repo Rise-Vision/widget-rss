@@ -8,7 +8,7 @@
   <link rel="stylesheet" type="text/css" href="../../src/widget/css/rss.css">
   <link rel="stylesheet" href="../../src/components/widget-common/dist/css/message.css">
 
-  <script src="../../src/components/webcomponentsjs/webcomponents-loader.js"></script>
+  <script src="../../src/components/webcomponentsjs/webcomponents-lite.js"></script>
   <script src="../../src/components/web-component-tester/browser.js"></script>
 
   <link rel="import" href="../../src/components/rise-rss/rise-rss.html">
@@ -49,114 +49,140 @@
 
 <script>
 
-  var clock, paramsStub, spy, paramsStub2, server;
+  var clock, spy, server, ready = false;
   var rss = document.querySelector("rise-rss");
 
-  function startTests() {
-    suite("Logging", function(){
-      var table = "rss_events",
-        params = {
-          "feed_url": "http://test.com/feed.rss",
-          "company_id": '"companyId"',
-          "display_id": '"displayId"'
-        };
+  sinon.stub(RiseVision.RSS, "setAdditionalParams", function (names, values) {
+    var isRSSReady = function() {
+      if ( !rss.go ) {
+        setTimeout( isRSSReady, 100 );
+      } else {
+        config();
+      }
+    }
+
+    function config() {
+      ready = true;
+      // need to set the fake timer clock before any of the code within setAdditionalParams is executed
+      clock = sinon.useFakeTimers();
+
+      server = sinon.fakeServer.create();
+      server.respondImmediately = true;
+
+      server.respondWith("GET", "/components/widget-rss/test/integration/layouts/layout-4x1.html",
+        [200, { "Content-Type": "text/html" }, layout]);
+      server.respondWith(JSON.stringify(jsonRSS));
+
+      spy = sinon.spy(RiseVision.Common.LoggerUtils, "logEvent");
+
+      sinon.stub(rss.$.data, "getItem", function(key, cb) {
+        cb(null);
+      });
+
+      sinon.stub(rss, "go", function () {
+        // restore the function
+        rss.go.restore();
+
+        rss._onDataPingReceived();
+        rss._onDisplayIdReceived();
+
+        // call it again with the params
+        rss.go();
+      });
+
+      // restore the function
+      RiseVision.RSS.setAdditionalParams.restore();
+      // call it again with the params
+      RiseVision.RSS.setAdditionalParams(names, values);
+    }
+
+    isRSSReady();
+  });
+
+  var check = function( done ) {
+    if ( ready ) {
+      done();
+    } else {
+      setTimeout( function() {
+        check( done )
+      }, 1000 );
+    }
+  };
+
+  suite("Logging", function(){
+    var table = "rss_events",
+      params = {
+        "feed_url": "http://test.com/feed.rss",
+        "company_id": '"companyId"',
+        "display_id": '"displayId"'
+      };
+
+    suiteSetup(function(done) {
+      check(done);
+    });
+
+    suiteTeardown(function() {
+      clock.restore();
+      server.restore();
+    });
+
+    suite("configuration", function() {
 
       suiteTeardown(function() {
-        clock.restore();
-        server.restore();
+        spy.restore();
       });
 
-      suite("configuration", function() {
+      test("should log the configuration event with correct details", function() {
+        var details = {
+          layout: "layout-4x1",
+          layoutUrl: null
+        };
 
-        suiteTeardown(function() {
-          spy.restore();
-        });
+        params.event = "configuration";
+        params.event_details = JSON.stringify( details );
 
-        test("should log the configuration event with correct details", function() {
-          var details = {
-            layout: "layout-4x1",
-            layoutUrl: null
-          };
-
-          params.event = "configuration";
-          params.event_details = JSON.stringify( details );
-
-          assert(spy.calledOnce);
-          assert(spy.calledWith(table, params));
-        });
-
-      });
-
-      suite("no feed items", function() {
-
-        setup(function() {
-          spy = sinon.spy(RiseVision.Common.LoggerUtils, "logEvent");
-        });
-
-        teardown(function() {
-          spy.restore();
-        });
-
-        test("should log no feed items error when initializing", function() {
-          RiseVision.RSS.onRiseRSSInit({
-            items: []
-          });
-
-          params.event = "warning";
-          params.event_details = "no feed items";
-
-          assert(spy.calledOnce);
-          assert(spy.calledWith(table, params));
-        });
-
-        test("should log no feed items error when refreshing", function() {
-          RiseVision.RSS.onRiseRSSRefresh({
-            items: []
-          });
-
-          params.event = "warning";
-          params.event_details = "no feed items";
-
-          assert(spy.calledOnce);
-          assert(spy.calledWith(table, params));
-        });
-
+        assert(spy.calledOnce);
+        assert(spy.calledWith(table, params));
       });
 
     });
-  }
 
-  sinon.stub(rss.$.data, "getItem", function(key, cb) {
-    cb(null);
-  });
+    suite("no feed items", function() {
 
-  paramsStub = sinon.stub(RiseVision.RSS, "setAdditionalParams", function (names, values) {
-    // need to set the fake timer clock before any of the code within setAdditionalParams is executed
-    clock = sinon.useFakeTimers();
+      setup(function() {
+        spy = sinon.spy(RiseVision.Common.LoggerUtils, "logEvent");
+      });
 
-    server = sinon.fakeServer.create();
-    server.respondImmediately = true;
+      teardown(function() {
+        spy.restore();
+      });
 
-    server.respondWith("GET", "/components/widget-rss/test/integration/layouts/layout-4x1.html",
-      [200, { "Content-Type": "text/html" }, layout]);
-    server.respondWith(JSON.stringify(jsonRSS));
+      test("should log no feed items error when initializing", function() {
+        RiseVision.RSS.onRiseRSSInit({
+          items: []
+        });
 
-    spy = sinon.spy(RiseVision.Common.LoggerUtils, "logEvent");
+        params.event = "warning";
+        params.event_details = "no feed items";
 
-    // restore the function
-    paramsStub.restore();
-    // call it again with the params
-    RiseVision.RSS.setAdditionalParams(names, values);
-    startTests();
-  });
+        assert(spy.calledOnce);
+        assert(spy.calledWith(table, params));
+      });
 
-  paramsStub2 = sinon.stub(rss, "go", function () {
-    // restore the function
-    paramsStub2.restore();
-    rss._onDataPingReceived();
-    rss._onDisplayIdReceived();
-    // call it again with the params
-    rss.go();
+      test("should log no feed items error when refreshing", function() {
+        RiseVision.RSS.onRiseRSSRefresh({
+          items: []
+        });
+
+        params.event = "warning";
+        params.event_details = "no feed items";
+
+        assert(spy.calledOnce);
+        assert(spy.calledWith(table, params));
+      });
+
+    });
+
   });
 
 </script>
