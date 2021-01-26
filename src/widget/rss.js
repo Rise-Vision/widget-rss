@@ -39,7 +39,7 @@ RiseVision.RSS = ( function( document, gadgets ) {
       event: "configuration",
       event_details: JSON.stringify( details ),
       feed_url: _additionalParams.url
-    }, { severity: "info", debugInfo: JSON.stringify( { feed_url: _additionalParams.url } ) } );
+    }, { severity: "info", debugInfo: JSON.stringify( { event: "configuration", feed_url: _additionalParams.url } ) } );
   }
 
   function _noFeedItems() {

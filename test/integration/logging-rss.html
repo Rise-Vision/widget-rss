@@ -149,7 +149,7 @@
 
         assert(spy.calledOnce);
         assert(spy.calledWith(table, params, {
-          severity: "info", eventApp: endpointParams.eventApp, debugInfo: JSON.stringify({feed_url: params.feed_url})
+          severity: "info", eventApp: endpointParams.eventApp, debugInfo: JSON.stringify({event: "configuration", feed_url: params.feed_url})
         }));
       });
 
