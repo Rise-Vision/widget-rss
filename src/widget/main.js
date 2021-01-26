@@ -35,7 +35,7 @@
 
       RiseVision.Common.LoggerUtils.setIds( companyId, displayId );
       RiseVision.Common.LoggerUtils.setVersion( version );
-      RiseVision.Common.LoggerUtils.startEndpointHeartbeats( "widget-web-page" );
+      RiseVision.Common.LoggerUtils.startEndpointHeartbeats( "widget-rss" );
 
       if ( names[ 2 ] === "additionalParams" ) {
         additionalParams = JSON.parse( values[ 2 ] );
