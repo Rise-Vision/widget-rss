@@ -178,6 +178,11 @@
           "event_details": "canvas width is over the max size",
           "feed_url": "http://test.com/feed.rss"
         });
+        assert.deepEqual(spy.args[0][1], {
+          severity: "warning",
+          eventApp: "widget-rss",
+          debugInfo: JSON.stringify( {feed_url: "http://test.com/feed.rss" } )
+        });
 
         RiseVision.RSS.logEvent.restore();
         done();

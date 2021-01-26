@@ -117,6 +117,10 @@
         "company_id": '"companyId"',
         "display_id": '"displayId"',
         "version": version
+      },
+      endpointParams = {
+        severity: "warning",
+        eventApp: "widget-rss"
       };
 
     suiteSetup(function(done) {
@@ -144,7 +148,9 @@
         params.event_details = JSON.stringify( details );
 
         assert(spy.calledOnce);
-        assert(spy.calledWith(table, params));
+        assert(spy.calledWith(table, params, {
+          severity: "info", eventApp: endpointParams.eventApp, debugInfo: JSON.stringify({feed_url: params.feed_url})
+        }));
       });
 
     });
@@ -166,9 +172,10 @@
 
         params.event = "warning";
         params.event_details = "no feed items";
+        endpointParams.debugInfo = JSON.stringify( {feed_url: params.feed_url} );
 
         assert(spy.calledOnce);
-        assert(spy.calledWith(table, params));
+        assert(spy.calledWith(table, params, endpointParams));
       });
 
       test("should log no feed items error when refreshing", function() {
@@ -178,9 +185,10 @@
 
         params.event = "warning";
         params.event_details = "no feed items";
+        endpointParams.debugInfo = JSON.stringify( {feed_url: params.feed_url} );
 
         assert(spy.calledOnce);
-        assert(spy.calledWith(table, params));
+        assert(spy.calledWith(table, params, endpointParams));
       });
 
     });

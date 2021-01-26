@@ -75,6 +75,7 @@
 
           assert.equal(spyCall.args[0], "rss_events");
           assert.deepEqual(spyCall.args[1], params);
+          assert.deepEqual(spyCall.args[2], { severity: "error", errorCode: "E000000056", eventApp: "widget-rss" });
         });
       });
     }

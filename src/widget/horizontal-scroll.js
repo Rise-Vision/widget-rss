@@ -26,7 +26,7 @@ RiseVision.RSS.HorizontalScroll = function( params, content ) {
         "event": "warning",
         "event_details": "canvas width is over the max size",
         "feed_url": params.url
-      } );
+      }, { severity: "warning", debugInfo: JSON.stringify( { feed_url: params.url } ) } );
 
     } );
 
