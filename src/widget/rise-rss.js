@@ -45,6 +45,9 @@ RiseVision.RSS.RiseRSS = function( data ) {
         params = {
           "event": "error",
           "feed_url": data.url
+        },
+        endpointParams = {
+          "severity": "error"
         };
 
       if ( e.detail && typeof e.detail === "string" ) {
@@ -56,18 +59,24 @@ RiseVision.RSS.RiseRSS = function( data ) {
 
       params.error_details = errorDetails;
       params.event_details = "rise rss error";
+      endpointParams.errorCode = "E000000061";
 
       if ( errorDetails.toLowerCase() === "401 unauthorized" ) {
         params.event_details = "feed authentication error";
+        endpointParams.errorCode = "E000000057";
         RiseVision.RSS.showError( "The feed at the URL provided cannot be shown because it is " +
           "protected and requires authentication." );
       } else if ( errorDetails.toLowerCase() === "404 not found" ) {
         params.event_details = "feed not found";
+        endpointParams.errorCode = "E000000058";
         RiseVision.RSS.showError( "The feed URL <span class='error-link'>" + data.url + "</span> could not be found." );
       } else if ( errorDetails.toLowerCase() === "not a feed" ) {
+        params.event_details = "not a feed";
+        endpointParams.errorCode = "E000000059";
         RiseVision.RSS.showError( "The URL provided is not an RSS feed." );
       } else if ( errorDetails.indexOf( "403" ) > 0 && errorDetails.toLowerCase().indexOf( "forbidden" ) > 0 ) {
         params.event_details = "feed request error";
+        endpointParams.errorCode = "E000000060";
         RiseVision.RSS.showError( "Sorry, there was a problem requesting the RSS feed, please contact the owner of the RSS feed to resolve." );
       } else {
         RiseVision.RSS.showError( "Sorry, there was a problem with the RSS feed." );
@@ -80,7 +89,7 @@ RiseVision.RSS.RiseRSS = function( data ) {
         return;
       }
 
-      RiseVision.RSS.logEvent( params );
+      RiseVision.RSS.logEvent( params, endpointParams );
     } );
 
     rss.setAttribute( "url", data.url );

@@ -39,7 +39,7 @@ RiseVision.RSS = ( function( document, gadgets ) {
       event: "configuration",
       event_details: JSON.stringify( details ),
       feed_url: _additionalParams.url
-    } );
+    }, { severity: "info", debugInfo: JSON.stringify( { event: "configuration", feed_url: _additionalParams.url } ) } );
   }
 
   function _noFeedItems() {
@@ -49,7 +49,7 @@ RiseVision.RSS = ( function( document, gadgets ) {
       "feed_url": _additionalParams.url
     };
 
-    logEvent( params );
+    logEvent( params, { severity: "warning", debugInfo: JSON.stringify( { feed_url: _additionalParams.url } ) } );
     showError( "There are no items to show from this RSS feed." );
   }
 
@@ -163,7 +163,7 @@ RiseVision.RSS = ( function( document, gadgets ) {
       "event_details": "layout not loaded",
       "error_details": url,
       "feed_url": _additionalParams.url
-    } );
+    }, { severity: "error", errorCode: "E000000056" } );
 
     _ready();
   }
@@ -196,8 +196,12 @@ RiseVision.RSS = ( function( document, gadgets ) {
     return "rss_events";
   }
 
-  function logEvent( params ) {
-    RiseVision.Common.LoggerUtils.logEvent( getTableName(), params );
+  function logEvent( params, endpointLoggingFields ) {
+    if ( endpointLoggingFields ) {
+      endpointLoggingFields.eventApp = "widget-rss";
+    }
+
+    RiseVision.Common.LoggerUtils.logEvent( getTableName(), params, endpointLoggingFields );
   }
 
   function onContentDone() {

@@ -35,6 +35,7 @@
   <script src="../../src/components/jQuery.dotdotdot/src/jquery.dotdotdot.js"></script>
   <script src="../../src/components/widget-common/dist/config.js"></script>
   <script src="../../src/components/widget-common/dist/common.js"></script>
+  <script src="../../src/config/version.js"></script>
   <script src="../../src/widget/rss.js"></script>
   <script src="../../src/widget/utils.js"></script>
 
@@ -68,11 +69,13 @@
               "error_details": "/components/widget-rss/test/integration/layouts/layout-invalid.html",
               "feed_url": "http://test.com/feed.rss",
               "company_id": '"companyId"',
-              "display_id": '"displayId"'
+              "display_id": '"displayId"',
+              "version": version
             };
 
           assert.equal(spyCall.args[0], "rss_events");
           assert.deepEqual(spyCall.args[1], params);
+          assert.deepEqual(spyCall.args[2], { severity: "error", errorCode: "E000000056", eventApp: "widget-rss" });
         });
       });
     }

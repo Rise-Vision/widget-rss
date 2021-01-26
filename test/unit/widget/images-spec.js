@@ -26,8 +26,8 @@ describe( "getImages", function() {
 
     assert.isArray( images );
     assert.equal( images.length, 2 );
-    assert.isObject( images[ 0 ] );
-    assert.isObject( images[ 1 ] );
+    assert.equal( typeof images[ 0 ], "object" );
+    assert.equal( typeof images[ 1 ], "object" );
   } );
 
 } );

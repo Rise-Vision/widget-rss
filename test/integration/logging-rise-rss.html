@@ -36,6 +36,7 @@
 <script src="../../src/components/jQuery.dotdotdot/src/jquery.dotdotdot.js"></script>
 <script src="../../src/components/widget-common/dist/config.js"></script>
 <script src="../../src/components/widget-common/dist/common.js"></script>
+<script src="../../src/config/version.js"></script>
 <script src="../../src/widget/rss.js"></script>
 <script src="../../src/widget/utils.js"></script>
 
@@ -101,7 +102,12 @@
       params = {
         "feed_url": "http://test.com/feed.rss",
         "company_id": '"companyId"',
-        "display_id": '"displayId"'
+        "display_id": '"displayId"',
+        "version": version
+      },
+      endpointParams = {
+        severity: "error",
+        eventApp: "widget-rss"
       },
       playStub;
 
@@ -134,9 +140,10 @@
         params.event = "error";
         params.event_details = "rise rss error";
         params.error_details = "Invalid RSS feed";
+        endpointParams.errorCode = "E000000061";
 
         assert(spy.calledOnce);
-        assert(spy.calledWith(table, params));
+        assert(spy.calledWith(table, params, endpointParams));
         done();
       });
 
@@ -155,9 +162,10 @@
         params.event = "error";
         params.event_details = "rise rss error";
         params.error_details = exampleMakeRequestMessage;
+        endpointParams.errorCode = "E000000061";
 
         assert(spy.calledOnce);
-        assert(spy.calledWith(table, params));
+        assert(spy.calledWith(table, params, endpointParams));
       });
 
       test("should log a rise rss error if the feed is not an RSS feed", function(done) {
@@ -168,10 +176,12 @@
           "bubbles": true
         }));
 
+        params.event_details = "not a feed";
         params.error_details = "Not a feed";
+        endpointParams.errorCode = "E000000059";
 
         assert(spy.calledOnce);
-        assert(spy.calledWith(table, params));
+        assert(spy.calledWith(table, params, endpointParams));
         done();
       });
 
@@ -186,9 +196,10 @@
         params.event = "error";
         params.event_details = "feed authentication error";
         params.error_details = "401 Unauthorized";
+        endpointParams.errorCode = "E000000057";
 
         assert(spy.calledOnce);
-        assert(spy.calledWith(table, params));
+        assert(spy.calledWith(table, params, endpointParams));
         done();
       });
 
@@ -203,9 +214,10 @@
         params.event = "error";
         params.event_details = "feed not found";
         params.error_details = "404 Not Found";
+        endpointParams.errorCode = "E000000058";
 
         assert(spy.calledOnce);
-        assert(spy.calledWith(table, params));
+        assert(spy.calledWith(table, params, endpointParams));
         done();
       });
 
@@ -220,9 +232,10 @@
         params.event = "error";
         params.event_details = "feed request error";
         params.error_details = "Bad status code: 403 message: Forbidden";
+        endpointParams.errorCode = "E000000060";
 
         assert(spy.calledOnce);
-        assert(spy.calledWith(table, params));
+        assert(spy.calledWith(table, params, endpointParams));
         done();
       });
 
@@ -237,6 +250,7 @@
         params.event = "error";
         params.event_details = "rise rss error";
         params.error_details = "ETIMEDOUT";
+        endpointParams.errorCode = "E000000061";
 
         assert.isFalse(spy.calledOnce);
 
@@ -253,7 +267,7 @@
         }));
 
         assert(spy.calledOnce);
-        assert(spy.calledWith(table, params));
+        assert(spy.calledWith(table, params, endpointParams));
         done();
       });
 
