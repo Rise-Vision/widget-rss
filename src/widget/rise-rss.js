@@ -45,7 +45,8 @@ RiseVision.RSS.RiseRSS = function( data ) {
         params = {
           "event": "error",
           "feed_url": data.url
-        }, endpointParams = {
+        },
+        endpointParams = {
           "severity": "error"
         };
 
